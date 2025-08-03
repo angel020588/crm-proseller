@@ -1,5 +1,6 @@
 
 const { Pool } = require('pg');
+const { Sequelize } = require('sequelize');
 
 // Configuración de PostgreSQL usando la variable de entorno de Replit
 const pool = new Pool({
@@ -44,8 +45,6 @@ const initDatabase = async () => {
 };
 
 // Configuración de Sequelize
-const { Sequelize } = require('sequelize');
-
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   logging: false,
@@ -62,5 +61,6 @@ module.exports = {
   query,
   pool,
   initDatabase,
-  sequelize
+  sequelize,
+  Sequelize
 };

@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const { initDatabase } = require('./config/database');
 const db = require('./models');
-const { sequelize } = require('./models');
+const { sequelize } = require('./config/database');
 
 // Inicializar PostgreSQL y modelos
 initDatabase()
