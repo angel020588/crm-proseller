@@ -104,7 +104,6 @@ export default function Resumen() {
   }
 
   return (
-    <>
     <div className="min-h-screen bg-gray-50">
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
