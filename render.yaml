@@ -38,7 +38,7 @@ services:
     sync: false
   - fromGroup: crm proseller
   region: oregon
-  buildCommand: cd client && npm install && npm run build
+  buildCommand: cd server && npm install && cd ../client && npm install && npm run build
   startCommand: node server/index.js
   autoDeployTrigger: commit
   previews:
