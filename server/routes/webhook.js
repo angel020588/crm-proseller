@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")("sk_test_1234567890abcdef");
 const { User, Subscription } = require("../models");
 
 // Webhook de Stripe
@@ -9,7 +9,7 @@ router.post(
   express.raw({ type: "application/json" }),
   async (req, res) => {
     const sig = req.headers["stripe-signature"];
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || "whsec_test_123456";
 
     let event;
     try {
