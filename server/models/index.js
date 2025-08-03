@@ -26,8 +26,8 @@ fs.readdirSync(__dirname)
   })
   .forEach((file) => {
     const modelDefiner = require(path.join(__dirname, file));
-    const ModelClass = modelDefiner(sequelize, Sequelize.DataTypes);
-    db[ModelClass.name] = ModelClass;
+    const model = modelDefiner(sequelize, Sequelize.DataTypes); // ✅ NO se usa 'new'
+    db[model.name] = model;
   });
 
 // Asociar modelos si tienen relaciones
