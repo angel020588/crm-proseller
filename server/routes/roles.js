@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 
-// 👇 IMPORTA BIEN EL MODELO DESDE models/index.js  
+// Importar modelos desde models/index.js  
 const db = require('../models');
 const Role = db.Role;
 const User = db.User;
@@ -11,7 +11,7 @@ const User = db.User;
 const { authMiddleware } = require('../middleware/auth');
 const { checkPermission } = require('../middleware/permissions');
 
-// 🚀 GET: obtener todos los roles
+// GET: obtener todos los roles
 router.get('/', async (req, res) => {
   try {
     const roles = await Role.findAll({
@@ -25,26 +25,35 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Crear nuevo rol
+// POST: Crear nuevo rol
 router.post('/', authMiddleware, checkPermission('admin', 'write'), async (req, res) => {
   try {
     const { name, displayName, description, permissions } = req.body;
+    
+    // Validar datos requeridos
+    if (!name || !displayName) {
+      return res.status(400).json({ message: 'Nombre y nombre de visualización son requeridos' });
+    }
     
     const role = await Role.create({
       name,
       displayName,
       description,
-      permissions
+      permissions: permissions || {},
+      isActive: true
     });
     
     res.status(201).json(role);
   } catch (error) {
     console.error('❌ Error creando rol:', error.message);
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
+    }
     res.status(500).json({ message: 'Error creando rol' });
   }
 });
 
-// Actualizar rol
+// PUT: Actualizar rol
 router.put('/:id', authMiddleware, checkPermission('admin', 'write'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -73,10 +82,45 @@ router.put('/:id', authMiddleware, checkPermission('admin', 'write'), async (req
   }
 });
 
-// Asignar rol a usuario
+// DELETE: Eliminar rol (desactivar)
+router.delete('/:id', authMiddleware, checkPermission('admin', 'delete'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const role = await Role.findByPk(id);
+    if (!role) {
+      return res.status(404).json({ message: 'Rol no encontrado' });
+    }
+    
+    // No permitir eliminar roles del sistema
+    if (['owner', 'admin', 'manager', 'sales', 'viewer'].includes(role.name)) {
+      return res.status(403).json({ message: 'No se puede eliminar este rol del sistema' });
+    }
+    
+    // Verificar si hay usuarios usando este rol
+    const usersWithRole = await User.count({ where: { roleId: id } });
+    if (usersWithRole > 0) {
+      return res.status(400).json({ 
+        message: `No se puede eliminar el rol. ${usersWithRole} usuario(s) lo están usando.` 
+      });
+    }
+    
+    await role.update({ isActive: false });
+    res.json({ message: 'Rol eliminado correctamente' });
+  } catch (error) {
+    console.error('❌ Error eliminando rol:', error.message);
+    res.status(500).json({ message: 'Error eliminando rol' });
+  }
+});
+
+// POST: Asignar rol a usuario
 router.post('/assign', authMiddleware, checkPermission('admin', 'write'), async (req, res) => {
   try {
     const { userId, roleId } = req.body;
+    
+    if (!userId || !roleId) {
+      return res.status(400).json({ message: 'userId y roleId son requeridos' });
+    }
     
     const user = await User.findByPk(userId);
     const role = await Role.findByPk(roleId);
@@ -97,7 +141,7 @@ router.post('/assign', authMiddleware, checkPermission('admin', 'write'), async 
   }
 });
 
-// Obtener permisos de un usuario
+// GET: Obtener permisos de un usuario
 router.get('/permissions/:userId', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
