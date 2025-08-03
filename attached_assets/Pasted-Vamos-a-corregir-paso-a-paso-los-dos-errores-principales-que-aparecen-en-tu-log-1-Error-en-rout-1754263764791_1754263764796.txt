@@ -1,0 +1,93 @@
+Vamos a corregir paso a paso los dos errores principales que aparecen en tu log:
+
+✅ 1. Error en routes/roles.js (Node.js)
+❌ Error:
+typescript
+Copiar
+Editar
+Error: Route.post() requires a callback function but got a [object Undefined]
+🔍 Causa:
+Estás usando un controlador undefined en esta línea dentro de routes/roles.js (línea 26 aprox):
+
+js
+Copiar
+Editar
+router.post('/algo', nombreDeFuncion);
+Y nombreDeFuncion no está definido o no está importado correctamente.
+
+✅ Solución:
+Verifica si estás importando el controlador en routes/roles.js. Por ejemplo:
+
+js
+Copiar
+Editar
+const { crearRol } = require('../controllers/rolesController');
+Confirma que la función crearRol existe en controllers/rolesController.js y está exportada:
+
+js
+Copiar
+Editar
+exports.crearRol = (req, res) => {
+  // lógica aquí
+};
+Luego, asegúrate que tu ruta lo use correctamente:
+
+js
+Copiar
+Editar
+router.post('/crear', crearRol);
+✅ 2. Error en Resumen.jsx (React)
+❌ Error:
+scss
+Copiar
+Editar
+Unterminated JSX contents. (423:10)
+Eso significa que dejaste algún </div> abierto o mal cerrado o hiciste una estructura JSX inválida.
+
+✅ Solución:
+Abre client/src/pages/Resumen.jsx.
+
+Busca en la parte cerca de la línea 423 y verifica que TODOS los componentes JSX estén correctamente cerrados:
+
+jsx
+Copiar
+Editar
+return (
+  <div className="contenedor">
+    <div className="seccion1">
+      {/* contenido */}
+    </div>
+    <div className="seccion2">
+      {/* contenido */}
+    </div>
+  </div> // <== esta es la línea 423
+);
+Evita esto (ejemplo de JSX mal cerrado):
+
+jsx
+Copiar
+Editar
+return (
+  <div>
+    <div>
+      <p>Hola
+    </div>
+  </div>
+); // ❌ Falta cerrar <p>
+Usa identación clara para que sea visible cualquier error de apertura/cierre.
+
+⚠️ Warnings secundarios:
+🟡 Supabase:
+Node.js 18 is deprecated...
+
+✅ Solución: No es urgente, pero en producción debes actualizar a Node.js 20 o superior.
+
+Puedes hacerlo en tu entorno local o en Replit si usas .replit o package.json para forzar una versión más nueva (si te interesa, te doy ese paso después).
+
+Resumen de pasos para ti:
+Archivo	Acción
+routes/roles.js	Asegúrate que todas las funciones de rutas .post, .get, etc., tengan una función definida/importada
+controllers/rolesController.js	Revisa que las funciones estén exportadas correctamente
+Resumen.jsx	Verifica que todos los tags JSX estén correctamente cerrados
+Node.js	No urgente, pero ideal actualizar a v20+ para evitar problemas con @supabase/supabase-js en el futuro
+
