@@ -51,24 +51,24 @@ initDatabase()
 
 // Routes
 // Rutas API
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/users", require("./routes/users"));
-app.use("/api/clients", require("./routes/clients"));
-app.use("/api/quotations", require("./routes/quotations"));
-app.use("/api/leads", require("./routes/leads"));
-app.use("/api/followups", require("./routes/followups"));
-app.use("/api/apikeys", require("./routes/apikeys"));
-app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/clients", clientRoutes);
+app.use("/api/quotations", quotationRoutes);
+app.use("/api/leads", leadRoutes);
+app.use("/api/followups", followupRoutes);
+app.use("/api/apikeys", apiKeyRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/resumen", require("./routes/resumen"));
-app.use("/api/analytics", require("./routes/analytics"));
-app.use("/api/notifications", require("./routes/notifications"));
-app.use("/api/automation", require("./routes/automation"));
-app.use("/api/roles", require("./routes/roles"));
-app.use("/api/ping", require("./routes/ping"));
-app.use("/api/debug", require("./routes/debug"));
-app.use("/api/subscriptions", require("./routes/subscriptions"));
-app.use("/api/custom-fields", require("./routes/custom-fields"));
-app.use("/api/contactos-telefonicos", require("./routes/contactos-telefonicos"));
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/notifications", notificationsRoutes);
+app.use("/api/automation", automationRoutes);
+app.use("/api/roles", rolesRoutes);
+app.use("/api/ping", pingRoute);
+app.use("/api/debug", debugRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/custom-fields", customFieldsRoutes);
+app.use("/api/contactos-telefonicos", contactosTelefonicosRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/supabase-clients", supabaseClientsRoutes);
 
