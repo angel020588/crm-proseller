@@ -6,7 +6,7 @@ modules = ["nodejs-18:v11-20230920-bd784b9", "postgresql-16"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["rs"]
+packages = ["rs", "lsof"]
 
 [env]
 PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin"
@@ -44,6 +44,10 @@ externalPort = 3000
 [[ports]]
 localPort = 3001
 externalPort = 3001
+
+[[ports]]
+localPort = 3002
+externalPort = 3002
 
 [[ports]]
 localPort = 5000
