@@ -25,10 +25,18 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach((file) => {
-    console.log("Model file:", file); // 👈 Debug para detectar archivo problemático
-    const modelDefiner = require(path.join(__dirname, file));
-    const ModelClass = modelDefiner(sequelize, Sequelize.DataTypes); // aquí truena si ese archivo exporta una clase directa
-    db[ModelClass.name] = ModelClass;
+    console.log("🕵️ Cargando modelo:", file); // Debug mejorado
+    try {
+      const modelDefiner = require(path.join(__dirname, file));
+      console.log("✅ Archivo cargado:", file, "- Tipo:", typeof modelDefiner);
+      const ModelClass = modelDefiner(sequelize, Sequelize.DataTypes);
+      console.log("✅ Modelo inicializado:", file, "- Nombre:", ModelClass.name);
+      db[ModelClass.name] = ModelClass;
+    } catch (error) {
+      console.error("❌ ERROR en archivo:", file);
+      console.error("❌ Error details:", error.message);
+      throw error; // Re-lanzar para que el proceso falle y veamos el culpable
+    }
   });
 
 // Asociar modelos si tienen relaciones
