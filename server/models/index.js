@@ -25,9 +25,10 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach((file) => {
+    console.log("Model file:", file); // 👈 Debug para detectar archivo problemático
     const modelDefiner = require(path.join(__dirname, file));
-    const model = modelDefiner(sequelize, Sequelize.DataTypes); // ✅ NO se usa 'new'
-    db[model.name] = model;
+    const ModelClass = modelDefiner(sequelize, Sequelize.DataTypes); // aquí truena si ese archivo exporta una clase directa
+    db[ModelClass.name] = ModelClass;
   });
 
 // Asociar modelos si tienen relaciones
