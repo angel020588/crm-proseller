@@ -1,5 +1,4 @@
 
-
 // server/models/Quotation.js
 module.exports = (sequelize, DataTypes) => {
   const Quotation = sequelize.define('Quotation', {

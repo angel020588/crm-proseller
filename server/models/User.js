@@ -1,5 +1,4 @@
 
-
 // server/models/User.js
 const { Model } = require('sequelize');
 const bcrypt = require('bcryptjs');
