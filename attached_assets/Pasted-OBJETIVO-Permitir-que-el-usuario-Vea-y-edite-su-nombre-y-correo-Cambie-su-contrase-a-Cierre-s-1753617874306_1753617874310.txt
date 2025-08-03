@@ -1,0 +1,163 @@
+OBJETIVO:
+Permitir que el usuario:
+
+Vea y edite su nombre y correo.
+
+Cambie su contraseña.
+
+Cierre sesión.
+
+1️⃣ BACKEND: Rutas de usuario
+Archivo: server/routes/user.js
+
+js
+Copiar
+Editar
+const express = require("express");
+const router = express.Router();
+const verifyToken = require("../../middlewares/verifyToken");
+const bcrypt = require("bcryptjs");
+const { User } = require("../models");
+
+// Obtener perfil del usuario
+router.get("/profile", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ["id", "name", "email", "createdAt"]
+    });
+    res.json(user);
+  } catch (error) {
+    console.error("Error al obtener perfil:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+// Actualizar nombre y correo
+router.put("/update", verifyToken, async (req, res) => {
+  const { name, email } = req.body;
+  try {
+    await User.update({ name, email }, { where: { id: req.user.id } });
+    res.json({ message: "Perfil actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar perfil:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+// Cambiar contraseña
+router.put("/password", verifyToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  try {
+    const user = await User.findByPk(req.user.id);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Contraseña actual incorrecta" });
+    }
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await user.update({ password: hashed });
+    res.json({ message: "Contraseña actualizada correctamente" });
+  } catch (error) {
+    console.error("Error al cambiar contraseña:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+module.exports = router;
+📌 En server/index.js agrega:
+
+js
+Copiar
+Editar
+app.use("/api/user", require("./routes/user"));
+2️⃣ FRONTEND: Crear página Perfil.jsx
+Archivo: client/src/pages/Perfil.jsx
+
+jsx
+Copiar
+Editar
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Perfil() {
+  const token = localStorage.getItem("token");
+  const [user, setUser] = useState({});
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const res = await axios.get("/api/user/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data);
+      setName(res.data.name);
+      setEmail(res.data.email);
+    };
+    fetchProfile();
+  }, []);
+
+  const updateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put("/api/user/update", { name, email }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessage("Perfil actualizado con éxito");
+    } catch {
+      setMessage("Error al actualizar perfil");
+    }
+  };
+
+  const changePassword = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put("/api/user/password", { currentPassword, newPassword }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setMessage("Contraseña cambiada con éxito");
+    } catch {
+      setMessage("Error al cambiar contraseña");
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Mi Perfil</h1>
+      {message && <p className="text-blue-700 mb-4">{message}</p>}
+
+      <form onSubmit={updateProfile} className="bg-white p-4 rounded shadow mb-6">
+        <h2 className="text-lg font-semibold mb-2">Actualizar Datos</h2>
+        <input value={name} onChange={e => setName(e.target.value)} className="border p-2 w-full mb-2 rounded" placeholder="Nombre" />
+        <input value={email} onChange={e => setEmail(e.target.value)} className="border p-2 w-full mb-2 rounded" placeholder="Correo" />
+        <button className="bg-blue-600 text-white px-4 py-2 rounded">Actualizar</button>
+      </form>
+
+      <form onSubmit={changePassword} className="bg-white p-4 rounded shadow mb-6">
+        <h2 className="text-lg font-semibold mb-2">Cambiar Contraseña</h2>
+        <input type="password" placeholder="Contraseña actual" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="border p-2 w-full mb-2 rounded" required />
+        <input type="password" placeholder="Nueva contraseña" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="border p-2 w-full mb-2 rounded" required />
+        <button className="bg-green-600 text-white px-4 py-2 rounded">Cambiar Contraseña</button>
+      </form>
+
+      <button onClick={logout} className="bg-red-600 text-white px-4 py-2 rounded">Cerrar Sesión</button>
+    </div>
+  );
+}
+3️⃣ Agrega ruta en el menú
+En tu Navbar o componente de navegación:
+
+jsx
+Copiar
+Editar
+<Link to="/perfil" className="text-white hover:underline">Mi Perfil</Link>

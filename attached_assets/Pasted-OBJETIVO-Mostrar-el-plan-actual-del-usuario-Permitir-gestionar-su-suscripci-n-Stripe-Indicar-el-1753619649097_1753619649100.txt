@@ -1,0 +1,128 @@
+OBJETIVO:
+Mostrar el plan actual del usuario
+
+Permitir gestionar su suscripción (Stripe)
+
+Indicar el estado del plan (activo, cancelado, expirado)
+
+Acceso visual al Stripe Customer Portal
+
+Alertas visuales si el plan está cancelado/inactivo
+
+✅ Paso 1: Página Subscription.jsx en React
+jsx
+Copiar
+Editar
+// 📁 client/src/pages/Subscription.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Subscription() {
+  const [plan, setPlan] = useState(null);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchSubscription = async () => {
+    try {
+      const res = await axios.get("/api/subscription", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPlan(res.data.plan);
+      setStatus(res.data.status);
+    } catch (err) {
+      setError("Error al cargar suscripción");
+    }
+  };
+
+  const openStripePortal = async () => {
+    try {
+      const res = await axios.post("/api/subscription/portal", {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      window.location.href = res.data.url;
+    } catch (err) {
+      alert("Error al redirigir al portal de Stripe");
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscription();
+  }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Mi Suscripción</h1>
+
+      {error && <p className="text-red-600">{error}</p>}
+
+      {plan ? (
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-lg font-semibold mb-2">Plan actual: <span className="text-blue-600">{plan}</span></p>
+          <p className="mb-4">
+            Estado:{" "}
+            <span className={`font-bold ${status === "active" ? "text-green-600" : "text-red-600"}`}>
+              {status}
+            </span>
+          </p>
+
+          <button onClick={openStripePortal} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Gestionar Suscripción
+          </button>
+        </div>
+      ) : (
+        <p className="text-gray-600">No tienes una suscripción activa.</p>
+      )}
+    </div>
+  );
+}
+✅ Paso 2: Rutas del backend necesarias
+GET /api/subscription
+js
+Copiar
+Editar
+// Obtener suscripción del usuario
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    res.json({
+      plan: user.plan || "Gratis",
+      status: user.subscriptionStatus || "inactivo",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener suscripción" });
+  }
+});
+POST /api/subscription/portal
+js
+Copiar
+Editar
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+router.post("/portal", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id);
+    if (!user.stripeCustomerId) {
+      return res.status(400).json({ error: "No tienes un cliente asociado en Stripe" });
+    }
+
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: user.stripeCustomerId,
+      return_url: "https://tu-app.com/dashboard", // Ajusta tu dominio
+    });
+
+    res.json({ url: portal.url });
+  } catch (err) {
+    res.status(500).json({ error: "Error al crear portal de Stripe" });
+  }
+});
+✅ Paso 3: Campos requeridos en la tabla users
+Agrega estas columnas si aún no están:
+
+sql
+Copiar
+Editar
+ALTER TABLE users ADD COLUMN plan VARCHAR(50) DEFAULT 'Gratis';
+ALTER TABLE users ADD COLUMN subscriptionStatus VARCHAR(50) DEFAULT 'inactivo';
+ALTER TABLE users ADD COLUMN stripeCustomerId VARCHAR(255);

@@ -1,0 +1,71 @@
+<!-- plantillas.html -->
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Plantillas por sector</title>
+    <link rel="stylesheet" href="estilos.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🧩 Plantillas por Sector</h1>
+      <button onclick="window.location.href='index.html'">
+        🏠 Regresar al menú
+      </button>
+    </header>
+
+    <section>
+      <label for="sector">Sector:</label>
+      <select id="sector">
+        <option value="ventas">Ventas</option>
+        <option value="inmobiliaria">Inmobiliaria</option>
+        <option value="salud">Salud</option>
+        <option value="soporte">Soporte Técnico</option>
+      </select>
+
+      <textarea id="contenido" placeholder="Escribe tu plantilla..."></textarea>
+      <button onclick="guardarPlantilla()">💾 Guardar</button>
+    </section>
+
+    <section>
+      <h2>🗂 Plantillas Guardadas</h2>
+      <ul id="lista-plantillas"></ul>
+    </section>
+
+    <script>
+      const lista = document.getElementById("lista-plantillas");
+      const sectorSelect = document.getElementById("sector");
+      const contenidoInput = document.getElementById("contenido");
+
+      function guardarPlantilla() {
+        const sector = sectorSelect.value;
+        const texto = contenidoInput.value;
+        if (!texto) return alert("Escribe algo para guardar.");
+
+        const plantilla = { sector, texto };
+        let plantillas = JSON.parse(localStorage.getItem("plantillas")) || [];
+        plantillas.push(plantilla);
+        localStorage.setItem("plantillas", JSON.stringify(plantillas));
+        contenidoInput.value = "";
+        mostrarPlantillas();
+      }
+
+      function mostrarPlantillas() {
+        lista.innerHTML = "";
+        const plantillas = JSON.parse(localStorage.getItem("plantillas")) || [];
+        plantillas.forEach((p, i) => {
+          const item = document.createElement("li");
+          item.innerHTML = `<b>${p.sector}:</b> ${p.texto} <button onclick="usar(${i})">Usar</button>`;
+          lista.appendChild(item);
+        });
+      }
+
+      function usar(i) {
+        const plantillas = JSON.parse(localStorage.getItem("plantillas")) || [];
+        contenidoInput.value = plantillas[i].texto;
+      }
+
+      mostrarPlantillas();
+    </script>
+  </body>
+</html>

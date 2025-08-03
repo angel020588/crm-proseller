@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Conectar WhatsApp</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📱 Conectar WhatsApp</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>🔗 Instrucciones de Conexión</h2>
+    <p>Para conectar tu WhatsApp Business API:</p>
+    <ol>
+      <li>Escanea el código QR con tu dispositivo móvil</li>
+      <li>Autoriza la conexión en tu teléfono</li>
+      <li>Espera la confirmación de conexión exitosa</li>
+    </ol>
+    
+    <div id="qr-container">
+      <p>📷 Código QR aparecerá aquí</p>
+      <button onclick="generarQR()">🔄 Generar Código QR</button>
+    </div>
+    
+    <div id="status-connection">
+      <p>Estado: <span id="connection-status">Desconectado</span></p>
+    </div>
+  </section>
+
+  <script>
+    function generarQR() {
+      document.getElementById('connection-status').textContent = 'Generando...';
+      
+      // Simulación de generación de QR
+      setTimeout(() => {
+        document.getElementById('qr-container').innerHTML = 
+          '<div style="width:200px;height:200px;border:2px solid #00ffff;margin:20px auto;display:flex;align-items:center;justify-content:center;">QR CODE AQUÍ</div>';
+        document.getElementById('connection-status').textContent = 'Esperando escaneo...';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

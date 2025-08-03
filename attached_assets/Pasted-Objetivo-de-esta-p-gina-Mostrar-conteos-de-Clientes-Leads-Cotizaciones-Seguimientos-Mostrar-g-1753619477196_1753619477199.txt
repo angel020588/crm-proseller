@@ -1,0 +1,92 @@
+Objetivo de esta página:
+Mostrar conteos de:
+
+Clientes
+
+Leads
+
+Cotizaciones
+
+Seguimientos
+
+Mostrar gráficas básicas de conversión y actividad (en la versión visual posterior)
+
+Todo protegido por token ✅
+
+✅ Paso 1: Código completo de Dashboard.jsx
+jsx
+Copiar
+Editar
+// 📁 client/src/pages/Dashboard.jsx
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({
+    clients: 0,
+    leads: 0,
+    quotations: 0,
+    followups: 0,
+  });
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchStats = async () => {
+    try {
+      const res = await axios.get("/api/dashboard", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setStats(res.data);
+    } catch (err) {
+      setError("Error al cargar estadísticas");
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-6">Resumen del CRM</h1>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="Clientes" value={stats.clients} />
+        <StatCard title="Leads" value={stats.leads} />
+        <StatCard title="Cotizaciones" value={stats.quotations} />
+        <StatCard title="Seguimientos" value={stats.followups} />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ title, value }) {
+  return (
+    <div className="bg-white shadow rounded p-4 text-center">
+      <h2 className="text-lg font-semibold mb-2">{title}</h2>
+      <p className="text-3xl font-bold text-blue-600">{value}</p>
+    </div>
+  );
+}
+✅ Paso 2: Ruta del backend /api/dashboard
+Esto ya fue agregado en tu backend con esta lógica central en routes/dashboard.js:
+
+js
+Copiar
+Editar
+router.get("/", authMiddleware, async (req, res) => {
+  try {
+    const [clients, leads, quotations, followups] = await Promise.all([
+      Client.count({ where: { userId: req.user.id } }),
+      Lead.count({ where: { userId: req.user.id } }),
+      Quotation.count({ where: { userId: req.user.id } }),
+      Followup.count({ where: { userId: req.user.id } }),
+    ]);
+    res.json({ clients, leads, quotations, followups });
+  } catch (err) {
+    res.status(500).json({ error: "Error al cargar estadísticas" });
+  }
+});

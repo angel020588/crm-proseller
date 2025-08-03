@@ -1,0 +1,201 @@
+
+Contacto
+Panel
+Buscar
+Buscar
+Pregúntale a la IA
+
+Comenzar
+Hogar
+Su primer despliegue
+Instancias gratuitas
+Características profesionales
+Migrar desde Heroku
+Preguntas frecuentes
+Tipos de servicios
+¿Cual utilizar?
+Sitios estáticos
+Servicios web
+Servicios privados
+Trabajadores de fondo
+Trabajos cron
+Arquitecturas multiservicio
+
+Implementando
+Cómo funcionan las implementaciones
+Idiomas admitidos
+Construir tubería
+Implementar ganchos
+Solución de problemas de implementaciones
+Proveedores de Git
+GitHub
+GitLab
+Bitbucket
+Implementar una confirmación específica
+Soporte para Monorepo
+Imágenes de Docker
+Descripción general
+Implementar desde un registro
+Usando secretos
+Tiempo de ejecución
+Tiempos de ejecución nativos
+Variables de entorno y secretos
+Variables de entorno predeterminadas
+
+Almacenes de datos
+Discos persistentes
+Valor clave (compatible con Redis®)
+Creando y conectando
+Preguntas frecuentes sobre Valkey/Redis
+bases de datos Postgres
+Descripción general
+Creando y conectando
+Recuperación y copias de seguridad
+Leer réplicas
+Alta disponibilidad
+Aplicaciones de administración
+Extensiones
+Agrupación de conexiones
+Actualizaciones de versión
+Solución de problemas de rendimiento
+Planes flexibles
+Tipos de instancias heredadas
+
+Redes
+Regiones
+Red privada
+Enlaces privados
+Almacenamiento en caché perimetral
+Ancho de banda de salida
+IP salientes
+certificados TLS
+Dominios personalizados
+Descripción general
+Cloudflare
+Namecheap
+Otros proveedores de DNS
+
+Controles operativos
+El panel de renderizado
+Proyectos y entornos
+Acciones de servicio
+Escalada
+Vistas previas del servicio
+Reversiones
+Modo de mantenimiento
+Trabajos puntuales
+Infraestructura como código
+Descripción general de los planos
+referencia render.yaml
+Entornos de vista previa
+Proveedor de Terraform
+
+Monitoreo y registros
+controles de salud
+Mejores prácticas de tiempo de actividad
+Notificaciones
+Webhooks
+Correo electrónico / Slack
+Métrica
+Métricas en el panel
+Transmisión de OpenTelemetry
+Explotación florestal
+Registros en el panel de control
+Transmisión de syslog
+SSH
+Descripción general
+Generar una clave
+Agregar una clave
+Solución de problemas de SSH
+
+Integraciones
+CLI
+Servidor MCP
+API REST
+Descripción general
+Referencia de API
+Herramientas de terceros
+Perro de datos
+IP estática de QuotaGuard
+Formspree
+
+Gestión de usuarios
+Espacios de trabajo, miembros y roles
+Configuración de inicio de sesión
+registros de auditoría
+Organizaciones empresariales
+Descripción general de la organización
+Inicio de sesión único SAML
+
+Protecciones de la plataforma
+Protección contra DDoS
+Mantenimiento de la plataforma
+Cumplimiento
+Descripción general
+HIPAA (datos de salud de EE. UU.)
+Mejores prácticas de HIPAA
+Modelo de responsabilidad compartida
+Política de pruebas de penetración
+
+Comparar
+Heroku vs Render
+Vercel vs. Render
+Conectar GitHub
+Implemente con cada envío a su rama vinculada.
+Conecta tuGitHubCuenta para Renderizar y comenzar a implementar aplicaciones y sitios usando cualquier repositorio al que tenga acceso. Render reimplementa automáticamente su proyecto con cada envío a su rama vinculada (puedeDeshabilitar esto).
+
+Render también puede poner en marcha uninstancia de vista previade su proyecto con cada solicitud de extracción abierta para ayudarlo a validar los cambios.
+
+Configuración
+Cuando creas tu primer servicio en elPanel de renderizadoSe le solicitará que conecte su proveedor de Git:
+
+Conexión de Git
+
+Haz clic en GitHub . Esto te redirigirá a GitHub para que puedas autorizar a Render a acceder a tus repositorios.
+
+Luego serás redirigido nuevamente al Panel de Render, que ahora muestra una lista de tus repositorios de GitHub:
+
+Lista de repositorios de GitHub en el panel de renderizado
+
+¡Has vinculado tu cuenta de GitHub correctamente! Al crear un nuevo servicio, selecciona cualquier repositorio disponible y haz clic en " Conectar" . Luego, completa el resto del proceso de creación del servicio.
+
+Vistas previas de solicitudes de extracción
+Render puede crear e implementar automáticamente una instancia de vista previa de su servicio para cada solicitud de extracción que se abra en su proyecto.
+
+Para más detalles, véaseVistas previas del servicio.
+
+Submódulos de Git
+Si su repositorio define un .gitmodulesarchivo en su raíz, Render lo lee automáticamente y clona todos los especificados.Submódulos de Gitcomo parte del proceso de construcción de su servicio.
+
+Si su .gitmodulesarchivo incluye submódulos privados , Render puede clonarlos solo si su cuenta de GitHub vinculada tiene acceso al repositorio privado correspondiente.
+
+Iniciar sesión con GitHub
+Además de implementar proyectos desde GitHub, puedes usar tu cuenta de GitHub para iniciar sesión enPanel de renderizadoSi ya tienes una cuenta de Render que coincide con la dirección de correo electrónico principal de tu cuenta de GitHub, Render te iniciará sesión en esa cuenta automáticamente.
+
+Obtenga más información sobregestión de métodos de inicio de sesión.
+
+Solución de problemas
+Si tus implementaciones de GitHub no funcionan como se espera, esto podría deberse a una configuración incorrecta de la aplicación de GitHub de Render. Por ejemplo, podría estar configurada para un conjunto de repositorios incorrecto, o un repositorio que antes era público podría haberse convertido en privado.
+
+Corrección de los permisos de la aplicación GitHub
+Visitagithub.com/apps/render/instalaciones/nuevoDesde aquí, puedes instalar la aplicación en una nueva organización o configurar una instalación existente:
+
+Configurar GitHub
+
+Desde aquí, puedes consultar la sección de acceso al repositorio para asegurarte de que tu repositorio esté incluido.
+
+Seleccionar repositorios de GitHub conectados
+
+Problemas específicos del equipo
+Si el creador de un servicio de Render pierde el acceso al repositorio de GitHub conectado a ese servicio, puede interrumpir las implementaciones de ese servicio. Puede actualizar las credenciales de Git utilizadas para implementar un servicio desde la página de configuración del servicio en el...Panel de renderizado:
+
+Credenciales de Git
+
+Antes de realizar este cambio, asegúrese de que las nuevas credenciales tengan acceso al repositorio Git del servicio.
+
+incógnita
+LinkedIn
+GitHub
+© Render 2025
+
+Variables de entorno y secretos – Documentación de renderizado

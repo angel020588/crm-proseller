@@ -1,0 +1,217 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estadísticas</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📊 Estadísticas de Usuario</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>👤 Usuario</h3>
+        <p><strong>Angel</strong></p>
+      </div>
+      <div class="stat-card">
+        <h3>💎 Plan Actual</h3>
+        <p><strong>Professional</strong></p>
+      </div>
+      <div class="stat-card">
+        <h3>💬 Mensajes</h3>
+        <p><strong>2,324</strong> / 7,500</p>
+        <div class="progress-bar">
+          <div class="progress" style="width: 31%"></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <h3>🖼️ Imágenes</h3>
+        <p><strong>45</strong> generadas</p>
+      </div>
+      <div class="stat-card">
+        <h3>🤖 IA Activa</h3>
+        <p><strong>OpenAI (GPT-4)</strong></p>
+      </div>
+      <div class="stat-card">
+        <h3>📅 Renovación</h3>
+        <p><strong>25 agosto, 2025</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>📈 Uso de Mensajes (Últimos 30 días)</h2>
+    <canvas id="grafica-mensajes" width="600" height="300"></canvas>
+  </section>
+
+  <section>
+    <h2>📊 Distribución por Tipo de Consulta</h2>
+    <canvas id="grafica-tipos" width="400" height="400"></canvas>
+  </section>
+
+  <section>
+    <h2>📋 Resumen de Actividad</h2>
+    <div class="activity-summary">
+      <div>📞 <strong>Contactos registrados:</strong> <span id="total-contactos">0</span></div>
+      <div>⚡ <strong>Respuestas rápidas:</strong> <span id="total-respuestas">0</span></div>
+      <div>🧩 <strong>Plantillas creadas:</strong> <span id="total-plantillas">0</span></div>
+      <div>📈 <strong>Última actividad:</strong> Hoy a las 14:32</div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Gráfica de mensajes
+    const ctxMensajes = document.getElementById('grafica-mensajes').getContext('2d');
+    const chartMensajes = new Chart(ctxMensajes, {
+      type: 'line',
+      data: {
+        labels: ['Jul 1', 'Jul 7', 'Jul 14', 'Jul 21', 'Jul 27', 'Ago 3', 'Ago 10'],
+        datasets: [{
+          label: 'Mensajes Enviados',
+          data: [0, 560, 900, 1400, 2324, 2800, 3200],
+          borderColor: '#00ffff',
+          backgroundColor: 'rgba(0, 255, 255, 0.2)',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#ffffff'
+            }
+          }
+        },
+        scales: {
+          y: { 
+            beginAtZero: true,
+            ticks: {
+              color: '#ffffff'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#ffffff'
+            }
+          }
+        }
+      }
+    });
+
+    // Gráfica de tipos de consulta
+    const ctxTipos = document.getElementById('grafica-tipos').getContext('2d');
+    const chartTipos = new Chart(ctxTipos, {
+      type: 'doughnut',
+      data: {
+        labels: ['Ventas', 'Soporte', 'Información', 'Cotizaciones', 'Otros'],
+        datasets: [{
+          data: [35, 25, 20, 15, 5],
+          backgroundColor: [
+            '#00ffff',
+            '#00c0c0',
+            '#008080',
+            '#006666',
+            '#004d4d'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#ffffff'
+            }
+          }
+        }
+      }
+    });
+
+    // Cargar estadísticas del localStorage
+    function cargarEstadisticas() {
+      const contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+      const respuestas = JSON.parse(localStorage.getItem("respuestasRapidas")) || {};
+      const plantillas = JSON.parse(localStorage.getItem("plantillas")) || [];
+
+      document.getElementById("total-contactos").textContent = contactos.length;
+      document.getElementById("total-respuestas").textContent = Object.keys(respuestas).length;
+      document.getElementById("total-plantillas").textContent = plantillas.length;
+    }
+
+    cargarEstadisticas();
+  </script>
+
+  <style>
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #00ffff;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      margin: 0 0 10px 0;
+      color: #00ffff;
+      font-size: 14px;
+    }
+
+    .stat-card p {
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #333;
+      border-radius: 4px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: #00ffff;
+      transition: width 0.3s ease;
+    }
+
+    .activity-summary {
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #00ffff;
+    }
+
+    .activity-summary div {
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    .etiqueta {
+      background-color: #00ffff;
+      color: #0b0d11;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+  </style>
+</body>
+</html>

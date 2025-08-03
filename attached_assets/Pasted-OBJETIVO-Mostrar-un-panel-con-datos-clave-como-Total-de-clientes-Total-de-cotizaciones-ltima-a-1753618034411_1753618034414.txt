@@ -1,0 +1,110 @@
+OBJETIVO:
+Mostrar un panel con datos clave como:
+
+Total de clientes
+
+Total de cotizaciones
+
+Última actividad
+
+Gráficas de actividad
+
+✅ 1. BACKEND: Ruta para estadísticas
+Archivo: server/routes/stats.js
+
+js
+Copiar
+Editar
+const express = require("express");
+const router = express.Router();
+const verifyToken = require("../../middlewares/verifyToken");
+const { Client, Quotation } = require("../models");
+
+router.get("/", verifyToken, async (req, res) => {
+  try {
+    const totalClients = await Client.count({ where: { userId: req.user.id } });
+    const totalQuotes = await Quotation.count({ where: { userId: req.user.id } });
+
+    const lastQuote = await Quotation.findOne({
+      where: { userId: req.user.id },
+      order: [["createdAt", "DESC"]],
+      attributes: ["createdAt"]
+    });
+
+    res.json({
+      totalClients,
+      totalQuotes,
+      lastQuoteDate: lastQuote ? lastQuote.createdAt : null,
+    });
+  } catch (error) {
+    console.error("Error en estadísticas:", error);
+    res.status(500).json({ message: "Error interno" });
+  }
+});
+
+module.exports = router;
+📌 En server/index.js agrega:
+
+js
+Copiar
+Editar
+app.use("/api/stats", require("./routes/stats"));
+✅ 2. FRONTEND: Página Dashboard.jsx
+Archivo: client/src/pages/Dashboard.jsx
+
+jsx
+Copiar
+Editar
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Dashboard() {
+  const token = localStorage.getItem("token");
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const res = await axios.get("/api/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setStats(res.data);
+    };
+    fetchStats();
+  }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-6">Panel de Control</h1>
+
+      {!stats ? (
+        <p>Cargando estadísticas...</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded shadow text-center">
+            <p className="text-gray-500 text-sm">Total de Clientes</p>
+            <h2 className="text-3xl font-bold">{stats.totalClients}</h2>
+          </div>
+          <div className="bg-white p-6 rounded shadow text-center">
+            <p className="text-gray-500 text-sm">Total de Cotizaciones</p>
+            <h2 className="text-3xl font-bold">{stats.totalQuotes}</h2>
+          </div>
+          <div className="bg-white p-6 rounded shadow text-center">
+            <p className="text-gray-500 text-sm">Última Cotización</p>
+            <h2 className="text-xl">
+              {stats.lastQuoteDate
+                ? new Date(stats.lastQuoteDate).toLocaleString()
+                : "Sin actividad"}
+            </h2>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+✅ 3. Enlace en el menú
+En tu componente de navegación:
+
+jsx
+Copiar
+Editar
+<Link to="/dashboard" className="text-white hover:underline">Dashboard</Link>

@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Centro de Soporte</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>🛠️ Centro de Soporte</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>📚 Tutoriales y Guías</h2>
+    <div class="tutoriales-grid">
+      <div class="tutorial-card">
+        <h3>🎥 Videos Tutoriales</h3>
+        <ul>
+          <li><a href="https://youtu.be/dummy1" target="_blank">📱 Cómo conectar WhatsApp</a></li>
+          <li><a href="https://youtu.be/dummy2" target="_blank">💳 Configurar pagos con Stripe</a></li>
+          <li><a href="https://youtu.be/dummy3" target="_blank">📊 Usar el dashboard de estadísticas</a></li>
+          <li><a href="https://youtu.be/dummy4" target="_blank">👥 Gestión de contactos y leads</a></li>
+        </ul>
+      </div>
+      
+      <div class="tutorial-card">
+        <h3>📖 Guías Escritas</h3>
+        <ul>
+          <li><a href="#" onclick="mostrarGuia('primeros-pasos')">🚀 Primeros pasos con el CRM</a></li>
+          <li><a href="#" onclick="mostrarGuia('integraciones')">🔗 Configurar integraciones</a></li>
+          <li><a href="#" onclick="mostrarGuia('automatizacion')">⚡ Automatización de procesos</a></li>
+          <li><a href="#" onclick="mostrarGuia('reportes')">📈 Generar reportes</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>📞 Contacto Directo</h2>
+    <div class="contacto-grid">
+      <div class="contacto-card">
+        <h3>📧 Email</h3>
+        <p><strong>soporte@whatsinteligenteia.com</strong></p>
+        <p>Tiempo de respuesta: 24 horas</p>
+        <button onclick="abrirEmail()">✉️ Enviar Email</button>
+      </div>
+      
+      <div class="contacto-card">
+        <h3>📱 WhatsApp</h3>
+        <p><strong>+52 55 4565 3161</strong></p>
+        <p>Horario: Lun-Vie 9:00-18:00</p>
+        <button onclick="abrirWhatsApp()">💬 Abrir WhatsApp</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>🎫 Sistema de Tickets</h2>
+    <div class="ticket-form">
+      <select id="categoria">
+        <option value="">Selecciona una categoría</option>
+        <option value="tecnico">🔧 Problema Técnico</option>
+        <option value="facturacion">💳 Facturación</option>
+        <option value="integracion">🔗 Integraciones</option>
+        <option value="capacitacion">📚 Capacitación</option>
+        <option value="otro">❓ Otro</option>
+      </select>
+      
+      <select id="prioridad">
+        <option value="baja">🟢 Baja</option>
+        <option value="media">🟡 Media</option>
+        <option value="alta">🔴 Alta</option>
+        <option value="urgente">🚨 Urgente</option>
+      </select>
+      
+      <input type="text" id="asunto" placeholder="Asunto del ticket">
+      <textarea id="mensaje" placeholder="Describe tu problema o consulta detalladamente..." rows="5"></textarea>
+      
+      <button onclick="enviarTicket()">📤 Enviar Ticket</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>🎟️ Mis Tickets</h2>
+    <ul id="lista-tickets"></ul>
+  </section>
+
+  <section id="guia-contenido" style="display: none;">
+    <h2>📖 Guía: <span id="guia-titulo"></span></h2>
+    <div id="guia-texto"></div>
+    <button onclick="cerrarGuia()">✖️ Cerrar</button>
+  </section>
+
+  <section>
+    <h2>❓ Preguntas Frecuentes</h2>
+    <div class="faq-container">
+      <div class="faq-item">
+        <h3 onclick="toggleFAQ(this)">¿Cómo cambio mi contraseña? ▼</h3>
+        <div class="faq-content">
+          <p>Ve a tu perfil → Configuración → Cambiar contraseña. Ingresa tu contraseña actual y la nueva.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <h3 onclick="toggleFAQ(this)">¿Puedo cancelar mi suscripción? ▼</h3>
+        <div class="faq-content">
+          <p>Sí, puedes cancelar desde el panel de suscripciones o contactando a soporte.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <h3 onclick="toggleFAQ(this)">¿Cómo exporto mis datos? ▼</h3>
+        <div class="faq-content">
+          <p>En cada sección (Contactos, Leads, etc.) encontrarás un botón "Exportar" que descarga un CSV.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    function enviarTicket() {
+      const categoria = document.getElementById("categoria").value;
+      const prioridad = document.getElementById("prioridad").value;
+      const asunto = document.getElementById("asunto").value;
+      const mensaje = document.getElementById("mensaje").value;
+      
+      if (!categoria || !asunto || !mensaje) {
+        return alert("❌ Por favor llena todos los campos obligatorios.");
+      }
+
+      const ticket = {
+        id: Date.now(),
+        categoria,
+        prioridad,
+        asunto,
+        mensaje,
+        fecha: new Date().toLocaleString(),
+        estado: 'abierto'
+      };
+
+      let tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      tickets.push(ticket);
+      localStorage.setItem("tickets", JSON.stringify(tickets));
+      
+      alert("✅ Ticket enviado correctamente. ID: " + ticket.id);
+      
+      // Limpiar formulario
+      document.getElementById("categoria").value = "";
+      document.getElementById("asunto").value = "";
+      document.getElementById("mensaje").value = "";
+      
+      mostrarTickets();
+    }
+
+    function mostrarTickets() {
+      const tickets = JSON.parse(localStorage.getItem("tickets")) || [];
+      const lista = document.getElementById("lista-tickets");
+      lista.innerHTML = "";
+
+      if (tickets.length === 0) {
+        lista.innerHTML = "<li>No tienes tickets enviados.</li>";
+        return;
+      }
+
+      tickets.forEach(ticket => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <div class="ticket-item">
+            <strong>ID: ${ticket.id}</strong> - ${getPrioridadIcon(ticket.prioridad)} ${ticket.prioridad.toUpperCase()}
+            <br><strong>${ticket.asunto}</strong>
+            <br>📅 ${ticket.fecha} | 📂 ${ticket.categoria}
+            <br>📄 ${ticket.mensaje.substring(0, 100)}...
+            <br><span class="estado-${ticket.estado}">Estado: ${ticket.estado.toUpperCase()}</span>
+          </div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    function getPrioridadIcon(prioridad) {
+      const icons = {
+        'baja': '🟢',
+        'media': '🟡', 
+        'alta': '🔴',
+        'urgente': '🚨'
+      };
+      return icons[prioridad] || '⚪';
+    }
+
+    function abrirEmail() {
+      window.open('mailto:soporte@whatsinteligenteia.com?subject=Consulta%20CRM', '_blank');
+    }
+
+    function abrirWhatsApp() {
+      window.open('https://wa.me/5215545653161?text=Hola,%20necesito%20ayuda%20con%20el%20CRM', '_blank');
+    }
+
+    function mostrarGuia(tipo) {
+      const guias = {
+        'primeros-pasos': {
+          titulo: 'Primeros Pasos con el CRM',
+          contenido: `
+            <h4>1. Configuración inicial</h4>
+            <p>• Completa tu perfil en la sección "Mi Cuenta"</p>
+            <p>• Configura tus integraciones (WhatsApp, Stripe, etc.)</p>
+            
+            <h4>2. Agregar tus primeros contactos</h4>
+            <p>• Ve a "Contactos" y agrega manualmente</p>
+            <p>• O importa desde CSV/Excel</p>
+            
+            <h4>3. Crear tu primer lead</h4>
+            <p>• En "Leads" crea un prospecto</p>
+            <p>• Asigna estado y prioridad</p>
+          `
+        },
+        'integraciones': {
+          titulo: 'Configurar Integraciones',
+          contenido: `
+            <h4>WhatsApp</h4>
+            <p>• Escanea el código QR desde "Integraciones"</p>
+            <p>• Verifica que aparezca "Conectado"</p>
+            
+            <h4>Stripe</h4>
+            <p>• Obtén tus claves API desde Stripe Dashboard</p>
+            <p>• Pégalas en "Configuración de Pagos"</p>
+          `
+        },
+        'automatizacion': {
+          titulo: 'Automatización de Procesos',
+          contenido: `
+            <h4>Respuestas automáticas</h4>
+            <p>• Configura palabras clave en "Respuestas"</p>
+            <p>• El sistema responderá automáticamente</p>
+            
+            <h4>Seguimientos</h4>
+            <p>• Programa recordatorios automáticos</p>
+            <p>• Configura escalaciones por tiempo</p>
+          `
+        },
+        'reportes': {
+          titulo: 'Generar Reportes',
+          contenido: `
+            <h4>Dashboard</h4>
+            <p>• Vista general de métricas clave</p>
+            <p>• Gráficos de conversión y actividad</p>
+            
+            <h4>Exportar datos</h4>
+            <p>• Cada sección tiene botón "Exportar"</p>
+            <p>• Descarga en formato CSV/Excel</p>
+          `
+        }
+      };
+      
+      const guia = guias[tipo];
+      if (guia) {
+        document.getElementById("guia-titulo").textContent = guia.titulo;
+        document.getElementById("guia-texto").innerHTML = guia.contenido;
+        document.getElementById("guia-contenido").style.display = "block";
+      }
+    }
+
+    function cerrarGuia() {
+      document.getElementById("guia-contenido").style.display = "none";
+    }
+
+    function toggleFAQ(element) {
+      const content = element.nextElementSibling;
+      const isVisible = content.style.display === "block";
+      
+      // Cerrar todos los FAQs
+      document.querySelectorAll('.faq-content').forEach(faq => {
+        faq.style.display = "none";
+      });
+      document.querySelectorAll('.faq-item h3').forEach(h3 => {
+        h3.innerHTML = h3.innerHTML.replace('▲', '▼');
+      });
+      
+      // Abrir/cerrar el seleccionado
+      if (!isVisible) {
+        content.style.display = "block";
+        element.innerHTML = element.innerHTML.replace('▼', '▲');
+      }
+    }
+
+    // Cargar tickets al iniciar
+    mostrarTickets();
+  </script>
+
+  <style>
+    .tutoriales-grid, .contacto-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .tutorial-card, .contacto-card {
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #00ffff;
+    }
+
+    .tutorial-card h3, .contacto-card h3 {
+      color: #00ffff;
+      margin-bottom: 15px;
+    }
+
+    .tutorial-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tutorial-card li {
+      margin: 10px 0;
+    }
+
+    .tutorial-card a, .contacto-card button {
+      color: #00ffff;
+      text-decoration: none;
+      padding: 8px 15px;
+      background-color: #2c2c2c;
+      border: 1px solid #00ffff;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 5px 0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tutorial-card a:hover, .contacto-card button:hover {
+      background-color: #00ffff;
+      color: #0b0d11;
+    }
+
+    .ticket-form {
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #00ffff;
+    }
+
+    .ticket-form select, .ticket-form input, .ticket-form textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #2c2c2c;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+
+    .ticket-item {
+      background-color: #1c1c1c;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border-left: 4px solid #00ffff;
+    }
+
+    .estado-abierto {
+      color: #00ffff;
+      font-weight: bold;
+    }
+
+    .faq-container {
+      margin: 20px 0;
+    }
+
+    .faq-item {
+      background-color: #1c1c1c;
+      margin: 10px 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .faq-item h3 {
+      background-color: #2c2c2c;
+      padding: 15px;
+      margin: 0;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .faq-item h3:hover {
+      background-color: #3c3c3c;
+    }
+
+    .faq-content {
+      display: none;
+      padding: 15px;
+      border-top: 1px solid #444;
+    }
+
+    #guia-contenido {
+      background-color: #1c1c1c;
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #00ffff;
+      margin: 20px 0;
+    }
+
+    #guia-contenido h4 {
+      color: #00ffff;
+      margin: 15px 0 10px 0;
+    }
+  </style>
+</body>
+</html>

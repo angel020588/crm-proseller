@@ -1,0 +1,113 @@
+// 📁 client/src/pages/Followups.jsx
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+export default function Followups() {
+  const [followups, setFollowups] = useState([]);
+  const [note, setNote] = useState("");
+  const [status, setStatus] = useState("pendiente");
+  const [date, setDate] = useState("");
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchFollowups = async () => {
+    try {
+      const res = await axios.get("/api/followups", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFollowups(res.data);
+    } catch (err) {
+      setError("Error al cargar seguimientos");
+    }
+  };
+
+  const createFollowup = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        "/api/followups",
+        { note, status, date },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNote(""); setStatus("pendiente"); setDate("");
+      fetchFollowups();
+    } catch (err) {
+      setError("Error al crear seguimiento");
+    }
+  };
+
+  const deleteFollowup = async (id) => {
+    if (!window.confirm("¿Eliminar este seguimiento?")) return;
+    try {
+      await axios.delete(`/api/followups/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchFollowups();
+    } catch (err) {
+      setError("Error al eliminar seguimiento");
+    }
+  };
+
+  useEffect(() => { fetchFollowups(); }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Seguimientos</h1>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <form onSubmit={createFollowup} className="bg-white p-4 rounded shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            placeholder="Nota"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            required
+            className="border p-2 rounded"
+          />
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="border p-2 rounded"
+          >
+            <option value="pendiente">Pendiente</option>
+            <option value="completado">Completado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="border p-2 rounded"
+          />
+        </div>
+        <button
+          type="submit"
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Agregar Seguimiento
+        </button>
+      </form>
+
+      <ul className="space-y-3">
+        {followups.map((f) => (
+          <li key={f.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
+            <div>
+              <p className="font-bold">{f.note}</p>
+              <p className="text-sm text-gray-600">Estado: {f.status}</p>
+              <p className="text-sm">Fecha: {f.date}</p>
+            </div>
+            <button
+              onClick={() => deleteFollowup(f.id)}
+              className="text-red-600 hover:underline"
+            >
+              Eliminar
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

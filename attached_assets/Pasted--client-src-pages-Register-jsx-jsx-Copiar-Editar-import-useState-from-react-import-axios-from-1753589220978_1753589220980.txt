@@ -1,0 +1,90 @@
+ client/src/pages/Register.jsx
+jsx
+Copiar
+Editar
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+export default function Register() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("/api/auth/register", {
+        email,
+        password,
+        name,
+        roleName: "Vendedor", // o puedes ponerlo como dropdown si quieres
+      });
+
+      localStorage.setItem("token", res.data.token);
+      navigate("/clients"); // redirige al panel
+    } catch (err) {
+      setError(err.response?.data?.message || "Error al registrar");
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form onSubmit={handleRegister} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        <h2 className="text-2xl font-bold mb-4 text-center">Crear Cuenta</h2>
+
+        {error && <p className="text-red-600 mb-3">{error}</p>}
+
+        <input
+          type="text"
+          placeholder="Tu nombre"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full mb-4 p-2 border rounded"
+        />
+
+        <input
+          type="email"
+          placeholder="Correo"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className="w-full mb-4 p-2 border rounded"
+        />
+
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="w-full mb-6 p-2 border rounded"
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+        >
+          Registrarme
+        </button>
+      </form>
+    </div>
+  );
+}
+📄 2. En App.jsx agrega la ruta:
+jsx
+Copiar
+Editar
+import Register from "./pages/Register";
+
+<Route path="/register" element={<Register />} />
+🔁 En el Login.jsx, agrega un enlace tipo:
+jsx
+Copiar
+Editar
+<p className="text-sm text-center mt-4">
+  ¿No tienes cuenta? <a href="/register" className="text-blue-600 underline">Regístrate</a>
+</p>

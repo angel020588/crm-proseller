@@ -1,0 +1,82 @@
+server/routes/webhooks.js
+js
+Copiar
+Editar
+const express = require("express");
+const router = express.Router();
+const { buffer } = require("micro");
+const Stripe = require("stripe");
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const { User } = require("../models");
+
+router.post("/stripe", express.raw({ type: "application/json" }), async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    console.error("Webhook error:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // 🎯 Evento: suscripción completada
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    const customerId = session.customer;
+
+    try {
+      // Buscar al usuario por su Stripe customer ID
+      const user = await User.findOne({ where: { stripeCustomerId: customerId } });
+      if (!user) {
+        console.warn("Usuario no encontrado con el customer ID:", customerId);
+        return res.status(404).send("Usuario no encontrado");
+      }
+
+      const subscription = await stripe.subscriptions.retrieve(session.subscription);
+      const planId = subscription.items.data[0].price.id;
+
+      await user.update({
+        plan: planId,
+        subscriptionStatus: subscription.status,
+        stripeSubscriptionId: subscription.id,
+      });
+
+      console.log("✅ Usuario actualizado con nuevo plan:", planId);
+    } catch (err) {
+      console.error("Error al actualizar usuario:", err.message);
+      return res.status(500).send("Error en webhook");
+    }
+  }
+
+  res.status(200).send("Evento recibido");
+});
+
+module.exports = router;
+✅ Asegúrate de:
+Tener .env con estas claves:
+
+env
+Copiar
+Editar
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+Tener en User.js estos campos (si no los tienes, te los preparo):
+
+stripeCustomerId
+
+plan
+
+subscriptionStatus
+
+stripeSubscriptionId
+
+Registrar el webhook en tu backend:
+
+js
+Copiar
+Editar
+// 📁 server/index.js o app.js
+const stripeWebhooks = require("./routes/webhooks");
+app.use("/api/webhooks", stripeWebhooks);

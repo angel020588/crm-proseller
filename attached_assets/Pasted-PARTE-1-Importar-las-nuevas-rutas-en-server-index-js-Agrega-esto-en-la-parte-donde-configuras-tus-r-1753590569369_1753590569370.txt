@@ -1,0 +1,87 @@
+PARTE 1: Importar las nuevas rutas en server/index.js
+Agrega esto en la parte donde configuras tus rutas (después de app.use(express.json())):
+
+js
+Copiar
+Editar
+// 🔐 Middlewares base
+const quotationRoutes = require("./routes/quotations");
+const followupRoutes = require("./routes/followups");
+const notificationRoutes = require("./routes/notifications");
+const analyticsRoutes = require("./routes/analytics");
+const accountRoutes = require("./routes/account");
+
+// 🧠 Rutas protegidas
+app.use("/api/quotations", quotationRoutes);
+app.use("/api/followups", followupRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/account", accountRoutes);
+Y asegúrate que arriba ya tienes:
+
+js
+Copiar
+Editar
+app.use(express.json());
+require("dotenv").config();
+✅ PARTE 2: Base visual para /dashboard en React
+Crea el archivo:
+
+swift
+Copiar
+Editar
+/client/src/pages/Dashboard.jsx
+Y pega este código:
+
+jsx
+Copiar
+Editar
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Dashboard() {
+  const [data, setData] = useState({ totalLeads: 0, totalClients: 0, totalQuotations: 0 });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    axios.get("/api/analytics/summary", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => setData(res.data))
+    .catch(err => {
+      console.error(err);
+      setError("Error al cargar el dashboard");
+    });
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <h1 className="text-3xl font-bold mb-6">Panel General</h1>
+      {error && <p className="text-red-600">{error}</p>}
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card title="Total de Leads" value={data.totalLeads} />
+        <Card title="Clientes registrados" value={data.totalClients} />
+        <Card title="Cotizaciones emitidas" value={data.totalQuotations} />
+      </div>
+    </div>
+  );
+}
+
+function Card({ title, value }) {
+  return (
+    <div className="bg-white shadow p-6 rounded">
+      <h2 className="text-xl font-semibold mb-2">{title}</h2>
+      <p className="text-4xl font-bold text-blue-600">{value}</p>
+    </div>
+  );
+}
+📲 Agrega la ruta en App.jsx:
+jsx
+Copiar
+Editar
+import Dashboard from "./pages/Dashboard";
+
+<Route path="/dashboard" element={<Dashboard />} />

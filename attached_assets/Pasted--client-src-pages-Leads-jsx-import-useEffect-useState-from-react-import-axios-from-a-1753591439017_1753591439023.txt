@@ -1,0 +1,93 @@
+// 📁 client/src/pages/Leads.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Leads() {
+  const [leads, setLeads] = useState([]);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [source, setSource] = useState("");
+  const [status, setStatus] = useState("nuevo");
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchLeads = async () => {
+    try {
+      const res = await axios.get("/api/leads", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLeads(res.data);
+    } catch (err) {
+      setError("Error al cargar leads");
+    }
+  };
+
+  const createLead = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        "/api/leads",
+        { name, email, source, status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setName(""); setEmail(""); setSource(""); setStatus("nuevo");
+      fetchLeads();
+    } catch (err) {
+      setError("Error al crear lead");
+    }
+  };
+
+  const deleteLead = async (id) => {
+    if (!window.confirm("¿Eliminar este lead?")) return;
+    try {
+      await axios.delete(`/api/leads/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchLeads();
+    } catch (err) {
+      setError("Error al eliminar lead");
+    }
+  };
+
+  useEffect(() => { fetchLeads(); }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Mis Leads</h1>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <form onSubmit={createLead} className="bg-white p-4 rounded shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Nombre" value={name} onChange={(e) => setName(e.target.value)} required className="border p-2 rounded" />
+          <input type="email" placeholder="Correo" value={email} onChange={(e) => setEmail(e.target.value)} className="border p-2 rounded" />
+          <input type="text" placeholder="Fuente" value={source} onChange={(e) => setSource(e.target.value)} className="border p-2 rounded" />
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className="border p-2 rounded">
+            <option value="nuevo">Nuevo</option>
+            <option value="contactado">Contactado</option>
+            <option value="calificado">Calificado</option>
+          </select>
+        </div>
+        <button type="submit" className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Agregar Lead
+        </button>
+      </form>
+
+      <ul className="space-y-3">
+        {leads.map((lead) => (
+          <li key={lead.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
+            <div>
+              <p className="font-bold">{lead.name}</p>
+              <p className="text-sm text-gray-600">{lead.email} — {lead.source}</p>
+              <p className="text-sm">Estatus: <span className="font-semibold">{lead.status}</span></p>
+            </div>
+            <button onClick={() => deleteLead(lead.id)} className="text-red-600 hover:underline">
+              Eliminar
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

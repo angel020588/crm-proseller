@@ -1,0 +1,51 @@
+
+Panel
+
+Documentación
+Configuración de su versión de Node.js
+Versión actual predeterminada de Node.js
+22.16.0
+
+Los servicios creados antes del 12/06/2025 tienen una versión predeterminada diferente.Vea abajo.
+
+Establezca una versión diferente de Node.js de cualquiera de las siguientes maneras (en orden descendente de precedencia):
+
+Establezca la NODE_VERSIONvariable de entorno para su servicio en elPanel de renderizado:
+
+Configuración de la variable de entorno NODE_VERSION
+
+Añade un archivo llamado .node-versiona la raíz de tu repositorio. Este archivo contiene una sola línea con la versión a usar:
+
+18.18.0
+Añade un archivo llamado .nvmrca la raíz de tu repositorio. Este archivo usa el mismo formato que .node-version.
+
+Especifique un rango de versiones de Node.js en su package.jsonarchivo, en elenginespropiedad:
+
+"engines": {
+  "node": ">=18.18.0 <19.0.0"
+}
+Si no hay un package.jsonarchivo en el directorio raíz de su repositorio, Render usa el primer package.jsonarchivo que encuentra en un subdirectorio.
+
+Incluya siempre un límite superior en su rango de versiones.
+
+Un rango ilimitado (como >=18) siempre se resuelve en ellatestliberarde Node.js, cuya versión principal se actualiza con el tiempo. Esto podría generar comportamientos inesperados o incompatibilidades con la versión de desarrollo.
+
+Puede especificar un número de versión semántica (como 18.18.0) o un alias (como lts).
+
+Render utiliza elnode-version-aliasMódulo para resolver alias de versiones ysemverrangos.
+
+Historial de versiones predeterminadas de Node.js
+Si no configura una versión de Node.js para su servicio, la versión predeterminada de Render depende de cuándo creó originalmente el servicio:
+
+Fecha de creación del servicio	Versión predeterminada de Node.js
+2025-06-12y más tarde	22.16.0
+2024-12-16 a 2025-06-12	22.12.0
+2024-11-24 a 2024-12-16	22.11.0
+2024-10-30 a 2024-11-24	22.10.0
+2024-07-09 a 2024-10-30	20.15.1
+2024-04-17 a 2024-07-09	20.12.2
+2024-04-04 a 2024-04-17	20.12.1
+2024-03-27 a 2024-04-04	20.12.0
+2024-02-23 a 2024-03-27	20.11.1
+2023-11-29 a 2024-02-23	20.10.0
+Antes2023-11-01	14.17.0

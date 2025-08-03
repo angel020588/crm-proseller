@@ -1,0 +1,97 @@
+Crear archivo seedRoles.js
+📁 Crea en /server/seeders/seedRoles.js (o donde prefieras):
+
+js
+Copiar
+Editar
+// server/seeders/seedRoles.js
+const { Role } = require("../models");
+
+const seedRoles = async () => {
+  const rolesBase = ["Admin", "Vendedor", "Manager"];
+
+  for (const name of rolesBase) {
+    const [role, created] = await Role.findOrCreate({
+      where: { name },
+    });
+
+    if (created) {
+      console.log(`✅ Rol creado: ${name}`);
+    }
+  }
+};
+
+module.exports = seedRoles;
+✅ PASO 2: Ejecutarlo al iniciar el servidor
+En tu archivo principal server/index.js (o donde levantas Express), agrega justo después del sequelize.sync():
+
+js
+Copiar
+Editar
+const seedRoles = require("./seeders/seedRoles");
+
+sequelize.sync({ alter: true }) // O force: true si estás en desarrollo puro
+  .then(async () => {
+    console.log("✅ Tablas sincronizadas");
+    await seedRoles();
+  })
+  .catch((err) => console.error("❌ Error al sincronizar DB:", err));
+✅ PASO 3: Endpoint POST /api/auth/register
+Ahora creamos la ruta para que un nuevo usuario se registre y se le asigne un rol.
+
+📄 routes/auth.js:
+js
+Copiar
+Editar
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const router = express.Router();
+
+const { User, Role } = require("../models");
+
+// Registro
+router.post("/register", async (req, res) => {
+  try {
+    const { email, password, name, roleName } = req.body;
+
+    // Buscar el rol
+    const role = await Role.findOne({ where: { name: roleName } });
+    if (!role) return res.status(400).json({ message: "Rol no válido" });
+
+    // Verificar si ya existe el usuario
+    const exist = await User.findOne({ where: { email } });
+    if (exist) return res.status(409).json({ message: "Correo ya registrado" });
+
+    // Hashear contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear usuario
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      name,
+      roleId: role.id,
+    });
+
+    // Generar token
+    const token = jwt.sign(
+      { id: newUser.id, role: role.name },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({ token, user: { id: newUser.id, name, email, role: role.name } });
+  } catch (err) {
+    console.error("❌ Error al registrar usuario:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+module.exports = router;
+📄 Y en server/index.js conecta esta ruta:
+js
+Copiar
+Editar
+const authRoutes = require("./routes/auth");
+app.use("/api/auth", authRoutes);

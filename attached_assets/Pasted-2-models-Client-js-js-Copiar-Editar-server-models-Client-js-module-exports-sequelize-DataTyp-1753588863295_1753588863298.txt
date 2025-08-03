@@ -1,0 +1,96 @@
+2. models/Client.js
+js
+Copiar
+Editar
+// server/models/Client.js
+module.exports = (sequelize, DataTypes) => {
+  const Client = sequelize.define('Client', {
+    name: DataTypes.STRING,
+    email: DataTypes.STRING,
+    phone: DataTypes.STRING,
+    address: DataTypes.STRING
+  });
+
+  Client.associate = (models) => {
+    Client.belongsTo(models.User, { foreignKey: 'userId' });
+  };
+
+  return Client;
+};
+📄 3. models/Lead.js
+js
+Copiar
+Editar
+// server/models/Lead.js
+module.exports = (sequelize, DataTypes) => {
+  const Lead = sequelize.define('Lead', {
+    name: DataTypes.STRING,
+    email: DataTypes.STRING,
+    source: DataTypes.STRING,
+    status: DataTypes.STRING
+  });
+
+  Lead.associate = (models) => {
+    Lead.belongsTo(models.User, { foreignKey: 'userId' });
+  };
+
+  return Lead;
+};
+📄 4. models/Role.js
+js
+Copiar
+Editar
+// server/models/Role.js
+module.exports = (sequelize, DataTypes) => {
+  const Role = sequelize.define('Role', {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    }
+  });
+
+  Role.associate = (models) => {
+    Role.hasMany(models.User, { foreignKey: 'roleId' });
+  };
+
+  return Role;
+};
+📄 5. models/index.js
+js
+Copiar
+Editar
+// server/models/index.js
+const { Sequelize, DataTypes } = require("sequelize");
+const { sequelize } = require("../config/sequelize");
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+// Importar modelos
+db.User = require("./User")(sequelize, DataTypes);
+db.Client = require("./Client")(sequelize, DataTypes);
+db.Lead = require("./Lead")(sequelize, DataTypes);
+db.Role = require("./Role")(sequelize, DataTypes);
+
+// Asociaciones
+Object.keys(db).forEach(modelName => {
+  if ("associate" in db[modelName]) {
+    db[modelName].associate(db);
+  }
+});
+
+module.exports = db;
+✅ PASO 2: Activar en server/index.js
+Abre tu server/index.js y antes de levantar el servidor, agrega:
+
+js
+Copiar
+Editar
+const { sequelize } = require("./models");
+
+sequelize.sync({ alter: true }) // O { force: true } si quieres reiniciar
+  .then(() => console.log("✅ Tablas sincronizadas con Sequelize"))
+  .catch(err => console.error("❌ Error al sincronizar DB:", err));

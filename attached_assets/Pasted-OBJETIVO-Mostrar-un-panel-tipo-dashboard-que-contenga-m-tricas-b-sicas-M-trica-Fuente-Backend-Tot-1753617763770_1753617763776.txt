@@ -1,0 +1,119 @@
+OBJETIVO:
+Mostrar un panel tipo dashboard que contenga métricas básicas:
+
+Métrica	Fuente Backend
+Total de clientes	Tabla clients
+Total de cotizaciones	Tabla quotations
+Total de API Keys activas	Tabla api_keys (isActive=1)
+Gráfica de actividad diaria	Opcional inicial (placeholder)
+
+1️⃣ BACKEND: Crear ruta de estadísticas
+Archivo: server/routes/dashboard.js
+
+js
+Copiar
+Editar
+const express = require("express");
+const router = express.Router();
+const verifyToken = require("../../middlewares/verifyToken");
+const { Client, Quotation, ApiKey } = require("../models");
+
+router.get("/stats", verifyToken, async (req, res) => {
+  try {
+    const [clients, quotations, apiKeys] = await Promise.all([
+      Client.count({ where: { userId: req.user.id } }),
+      Quotation.count({ where: { userId: req.user.id } }),
+      ApiKey.count({ where: { userId: req.user.id, isActive: true } }),
+    ]);
+
+    res.json({
+      totalClients: clients,
+      totalQuotations: quotations,
+      activeApiKeys: apiKeys,
+    });
+  } catch (error) {
+    console.error("Error al obtener estadísticas:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+module.exports = router;
+📌 Asegúrate de montar esta ruta en server/index.js:
+
+js
+Copiar
+Editar
+app.use("/api/dashboard", require("./routes/dashboard"));
+2️⃣ FRONTEND: Página Dashboard.jsx
+Archivo: client/src/pages/Dashboard.jsx
+
+jsx
+Copiar
+Editar
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Dashboard() {
+  const [stats, setStats] = useState({});
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("/api/dashboard/stats", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setStats(res.data);
+      } catch (err) {
+        setError("Error al cargar estadísticas");
+      }
+    };
+    fetchStats();
+  }, []);
+
+  return (
+    <div className="p-6 min-h-screen bg-gray-100">
+      <h1 className="text-2xl font-bold mb-6">📊 Panel de Estadísticas</h1>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-white shadow p-4 rounded">
+          <h2 className="text-gray-500 text-sm">Total de Clientes</h2>
+          <p className="text-3xl font-bold text-blue-700">{stats.totalClients || 0}</p>
+        </div>
+
+        <div className="bg-white shadow p-4 rounded">
+          <h2 className="text-gray-500 text-sm">Cotizaciones</h2>
+          <p className="text-3xl font-bold text-green-700">{stats.totalQuotations || 0}</p>
+        </div>
+
+        <div className="bg-white shadow p-4 rounded">
+          <h2 className="text-gray-500 text-sm">API Keys Activas</h2>
+          <p className="text-3xl font-bold text-purple-700">{stats.activeApiKeys || 0}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+3️⃣ NAVBAR: Agrega acceso visual
+En tu componente Navbar.jsx (o donde definas navegación):
+
+jsx
+Copiar
+Editar
+<Link to="/dashboard" className="text-white hover:underline">Estadísticas</Link>
+✅ ¿Avanzamos ahora con el punto 4 (Gestión de usuario: actualizar correo, cambiar contraseña, cerrar sesión)?
+
+
+
+
+
+
+
+
+Preguntar a ChatGPT
+
+

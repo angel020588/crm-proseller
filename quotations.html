@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cotizaciones</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>💰 Gestión de Cotizaciones</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>➕ Nueva Cotización</h2>
+    <input type="text" id="cliente" placeholder="Nombre del cliente">
+    <input type="email" id="email" placeholder="Email del cliente">
+    <textarea id="descripcion" placeholder="Descripción del servicio/producto"></textarea>
+    <input type="number" id="cantidad" placeholder="Cantidad">
+    <input type="number" id="precio" placeholder="Precio unitario">
+    <button onclick="crearCotizacion()">💾 Crear Cotización</button>
+  </section>
+
+  <section>
+    <h2>📋 Cotizaciones Existentes</h2>
+    <ul id="lista-cotizaciones"></ul>
+  </section>
+
+  <script>
+    function crearCotizacion() {
+      const cliente = document.getElementById("cliente").value;
+      const email = document.getElementById("email").value;
+      const descripcion = document.getElementById("descripcion").value;
+      const cantidad = document.getElementById("cantidad").value;
+      const precio = document.getElementById("precio").value;
+      
+      if (!cliente || !descripcion || !cantidad || !precio) {
+        return alert("Llena todos los campos obligatorios.");
+      }
+
+      const total = cantidad * precio;
+      const cotizacion = {
+        cliente,
+        email,
+        descripcion,
+        cantidad,
+        precio,
+        total,
+        fecha: new Date().toLocaleDateString()
+      };
+
+      // Guardar en localStorage
+      const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
+      cotizaciones.push(cotizacion);
+      localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+
+      alert(`💰 Cotización creada para ${cliente} por $${total}`);
+      
+      // Limpiar formulario
+      document.getElementById("cliente").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("descripcion").value = "";
+      document.getElementById("cantidad").value = "";
+      document.getElementById("precio").value = "";
+      
+      cargarCotizaciones();
+    }
+
+    function cargarCotizaciones() {
+      const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
+      const lista = document.getElementById("lista-cotizaciones");
+      lista.innerHTML = "";
+      
+      cotizaciones.forEach((cot, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <strong>${cot.cliente}</strong> - $${cot.total} 
+          <small>(${cot.fecha})</small>
+          <button onclick="eliminarCotizacion(${index})">🗑️</button>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    function eliminarCotizacion(index) {
+      const cotizaciones = JSON.parse(localStorage.getItem('cotizaciones') || '[]');
+      cotizaciones.splice(index, 1);
+      localStorage.setItem('cotizaciones', JSON.stringify(cotizaciones));
+      cargarCotizaciones();
+    }
+
+    // Cargar cotizaciones al iniciar
+    cargarCotizaciones();
+  </script>
+</body>
+</html>

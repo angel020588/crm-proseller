@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>IA Personalizada</title>
+    <link rel="stylesheet" href="estilos.css" />
+  </head>
+  <body>
+    <header>
+      <h1>🧠 IA Personalizada</h1>
+      <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+    </header>
+
+    <section>
+      <input
+        type="text"
+        id="titulo"
+        placeholder="Nombre del prompt (Ej. IA Ventas)"
+      />
+      <textarea id="prompt" placeholder="Escribe tu prompt aquí..."></textarea>
+      <button onclick="guardarPrompt()">💾 Guardar Prompt</button>
+    </section>
+
+    <section>
+      <h2>📂 Prompts Guardados</h2>
+      <ul id="lista-prompts"></ul>
+    </section>
+
+    <script>
+      function guardarPrompt() {
+        const titulo = document.getElementById("titulo").value;
+        const prompt = document.getElementById("prompt").value;
+        if (!titulo || !prompt) return alert("Ambos campos son obligatorios.");
+
+        const prompts = JSON.parse(localStorage.getItem("promptsIA")) || [];
+        prompts.push({ titulo, prompt });
+        localStorage.setItem("promptsIA", JSON.stringify(prompts));
+        document.getElementById("titulo").value = "";
+        document.getElementById("prompt").value = "";
+        mostrarPrompts();
+      }
+
+      function mostrarPrompts() {
+        const lista = document.getElementById("lista-prompts");
+        const prompts = JSON.parse(localStorage.getItem("promptsIA")) || [];
+        lista.innerHTML = "";
+
+        prompts.forEach((p, i) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<b>${p.titulo}</b>: ${p.prompt.substring(0, 100)}... 
+          <button onclick="usarPrompt(${i})">Usar</button>`;
+          lista.appendChild(li);
+        });
+      }
+
+      function usarPrompt(i) {
+        const prompts = JSON.parse(localStorage.getItem("promptsIA")) || [];
+        document.getElementById("prompt").value = prompts[i].prompt;
+        document.getElementById("titulo").value = prompts[i].titulo;
+      }
+
+      mostrarPrompts();
+    </script>
+  </body>
+</html>

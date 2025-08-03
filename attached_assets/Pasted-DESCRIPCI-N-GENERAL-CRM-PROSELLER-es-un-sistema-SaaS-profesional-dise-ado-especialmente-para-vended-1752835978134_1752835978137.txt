@@ -1,0 +1,183 @@
+DESCRIPCIÓN GENERAL:
+CRM PROSELLER es un sistema SaaS profesional diseñado especialmente para vendedores, asesores comerciales, equipos inmobiliarios, distribuidores o cualquier persona que requiera gestionar clientes, prospectos, tareas y procesos de venta en un solo lugar, con una experiencia visual intuitiva y herramientas prácticas que facilitan el seguimiento, aumentan la conversión y automatizan las tareas repetitivas.
+
+El CRM funciona con acceso por usuario (correo y contraseña), incluye un panel privado para cada vendedor, control de leads, módulo de clientes, agenda de seguimientos, historial completo, plantillas, automatización de cotizaciones, integración con WhatsApp y un panel administrador para controlar usuarios, estadísticas y permisos.
+
+🖥️ ESTRUCTURA VISUAL Y PANTALLAS DEL SISTEMA
+1. Login & Registro
+Pantalla limpia con logo, fondo blanco, campos para correo y contraseña
+
+Botón para recuperar contraseña
+
+Registro nuevo con verificación sencilla (opcional: código al correo)
+
+Versión móvil responsive
+
+2. Dashboard principal (usuario vendedor)
+📊 Al ingresar, el vendedor ve su panel de control:
+
+Total de clientes activos
+
+Total de leads en seguimiento
+
+Embudo visual con porcentajes de avance (Nuevo / Contactado / Cotizado / Cerrado / Perdido)
+
+Últimos 5 seguimientos programados (con reloj y botón para marcar como hecho)
+
+Actividad reciente: “Juan Pérez fue contactado hace 1 día”
+
+3. Módulo de Clientes
+📁 Pantalla con tabla tipo CRM profesional:
+
+Nombre del cliente
+
+Empresa o rubro
+
+Teléfono / WhatsApp (botón para abrir chat directo)
+
+Estado: Activo / Pausado / Cerrado
+
+Botón de acciones: ver detalle, editar, eliminar
+
+➡️ Al entrar a un cliente:
+
+Ficha completa con datos
+
+Notas internas
+
+Historial de actividad (todo lo que se ha hecho)
+
+Archivos adjuntos (PDFs, imágenes)
+
+Seguimientos pendientes o cumplidos
+
+4. Módulo de Prospectos (Leads)
+🎯 Tabla con embudo visual (Kanban o tabla):
+
+Nombre del prospecto
+
+Origen: Landing, WhatsApp, Feria, etc.
+
+Estado: Nuevo / Contactado / Cotizado / Cerrado
+
+Etiquetas: “Interesado en paquete solar”, “Requiere llamada”
+
+📝 Cada lead incluye:
+
+Seguimientos con fechas
+
+Envío de cotización rápida
+
+Comentarios internos
+
+Botón “Convertir en cliente”
+
+5. Seguimientos
+📅 Vista tipo calendario + lista:
+
+Citas programadas por día
+
+Recordatorios automáticos
+
+Notificación visual cuando estás por vencer seguimiento
+
+Botón “+ Seguimiento nuevo” (elige cliente o lead, fecha, hora, nota)
+
+6. Automatización de cotizaciones (opcional)
+📤 Desde la ficha de cliente o lead:
+
+Botón “Enviar cotización”
+
+Selecciona plantilla cargada previamente (ej. Paquete 1, Tinaco + Filtro, etc.)
+
+Se genera PDF y se puede:
+
+Descargar
+
+Enviar por correo
+
+Compartir por WhatsApp con un clic
+
+7. Historial de actividad
+🕓 Registro tipo bitácora:
+
+“Cotización enviada a Luis”, “Lead actualizado por Ángel”
+
+Filtro por usuario o fecha
+
+Ideal para control interno o equipos
+
+8. Panel de configuración del usuario
+⚙️ Pantalla donde cada usuario puede:
+
+Cambiar contraseña
+
+Subir logo o imagen de perfil
+
+Elegir idioma (Español, Inglés)
+
+Activar modo oscuro
+
+9. Panel ADMIN GLOBAL (para ti como dueño del sistema)
+🔐 Acceso exclusivo con contraseña maestra:
+
+Lista de todos los usuarios registrados
+
+Estado: Activo / Suspendido
+
+Estadísticas globales del CRM
+
+Acceso a métricas: clientes totales, actividad mensual, cotizaciones enviadas
+
+Gestión de planes SaaS (si decides monetizarlo)
+
+Control de suscripciones, cancelaciones, renovaciones
+
+Botón para ver CRM de cada usuario (modo fantasma tipo administrador)
+
+10. Extras futuros (fase 2 o premium)
+✅ Integración con:
+
+Stripe o MercadoPago para pagos de planes
+
+API de WhatsApp Business para enviar mensajes desde el CRM
+
+Calendly para agendar citas directamente
+
+Exportar clientes o leads en Excel
+
+💻 TECNOLOGÍAS DEL SISTEMA
+Área	Tecnología
+Frontend	React + Vite (rápido y visual)
+Backend	Node.js + Express
+Base de datos	MongoDB Atlas
+Autenticación	JWT + Middleware personalizado
+Hosting	Replit (desarrollo) + Vercel/Render (producción)
+UI	TailwindCSS o Bootstrap limpio
+
+🔐 NIVELES DE USUARIO
+Administrador global (tú)
+
+Control total del sistema y usuarios
+
+Usuarios vendedores
+
+Acceso solo a sus clientes, leads, actividades
+
+Supervisores (opcional)
+
+Acceso a CRM de todo su equipo
+
+🎯 OBJETIVO COMERCIAL:
+Ofrecer un CRM moderno, visual, rápido de usar y listo para venderlo como servicio. Ideal para:
+
+Asesores independientes
+
+Inmobiliarias
+
+Equipos de ventas
+
+Distribuidores de productos como Óptima Purify, Tinacos, etc.
+
+Negocios que necesitan orden pero no pueden pagar Hubspot o Zoho
+

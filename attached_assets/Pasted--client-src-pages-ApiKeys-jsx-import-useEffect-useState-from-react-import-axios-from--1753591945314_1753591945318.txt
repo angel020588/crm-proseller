@@ -1,0 +1,96 @@
+// 📁 client/src/pages/ApiKeys.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function ApiKeys() {
+  const [keys, setKeys] = useState([]);
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchKeys = async () => {
+    try {
+      const res = await axios.get("/api/apikeys", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setKeys(res.data);
+    } catch (err) {
+      setError("Error al cargar API Keys");
+    }
+  };
+
+  const createKey = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        "/api/apikeys/create",
+        { description },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("API Key creada: " + res.data.key);
+      setDescription("");
+      fetchKeys();
+    } catch (err) {
+      setError("Error al crear API Key");
+    }
+  };
+
+  const deactivateKey = async (key) => {
+    if (!window.confirm("¿Desactivar esta API Key?")) return;
+    try {
+      await axios.post(
+        "/api/apikeys/deactivate",
+        { key },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchKeys();
+    } catch (err) {
+      setError("Error al desactivar API Key");
+    }
+  };
+
+  useEffect(() => { fetchKeys(); }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Mis API Keys</h1>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <form onSubmit={createKey} className="bg-white p-4 rounded shadow mb-6">
+        <input
+          type="text"
+          placeholder="Descripción"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+          className="w-full border p-2 rounded mb-2"
+        />
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Crear nueva API Key
+        </button>
+      </form>
+
+      <ul className="space-y-3">
+        {keys.map((k) => (
+          <li key={k.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
+            <div>
+              <p className="font-mono text-sm break-all">{k.key}</p>
+              <p className="text-sm text-gray-500">{k.description || "Sin descripción"}</p>
+              <p className="text-sm">Estado: {k.active ? "🟢 Activa" : "🔴 Inactiva"}</p>
+            </div>
+            {k.active && (
+              <button
+                onClick={() => deactivateKey(k.key)}
+                className="text-red-600 hover:underline"
+              >
+                Desactivar
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

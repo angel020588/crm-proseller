@@ -1,0 +1,147 @@
+Contactos (con etiquetas y filtros)
+Módulo para registrar contactos, asignar etiquetas y filtrarlos visualmente. Luego se puede extender con CRM y seguimiento.
+
+🔧 Archivo: contactos.html
+html
+Copiar
+Editar
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Contactos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📇 Contactos</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <input type="text" id="nombre" placeholder="Nombre del contacto">
+    <input type="text" id="telefono" placeholder="Teléfono">
+    <input type="text" id="etiqueta" placeholder="Etiqueta (ej. interesado, cliente, soporte)">
+    <button onclick="agregarContacto()">💾 Guardar contacto</button>
+  </section>
+
+  <section>
+    <h2>📌 Filtrar por etiqueta</h2>
+    <input type="text" id="filtro" placeholder="Ej: cliente" oninput="filtrarContactos()">
+  </section>
+
+  <section>
+    <h2>📋 Lista de Contactos</h2>
+    <ul id="lista-contactos"></ul>
+  </section>
+
+  <script>
+    function agregarContacto() {
+      const nombre = document.getElementById("nombre").value;
+      const telefono = document.getElementById("telefono").value;
+      const etiqueta = document.getElementById("etiqueta").value.toLowerCase();
+
+      if (!nombre || !telefono) return alert("Nombre y teléfono son obligatorios.");
+
+      const contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+      contactos.push({ nombre, telefono, etiqueta });
+      localStorage.setItem("contactos", JSON.stringify(contactos));
+      limpiarCampos();
+      mostrarContactos();
+    }
+
+    function mostrarContactos(filtrar = "") {
+      const lista = document.getElementById("lista-contactos");
+      const contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+      lista.innerHTML = "";
+
+      contactos
+        .filter(c => filtrar === "" || c.etiqueta.includes(filtrar.toLowerCase()))
+        .forEach(c => {
+          const li = document.createElement("li");
+          li.innerHTML = `<b>${c.nombre}</b> - ${c.telefono} <i>[${c.etiqueta}]</i>`;
+          lista.appendChild(li);
+        });
+    }
+
+    function filtrarContactos() {
+      const filtro = document.getElementById("filtro").value;
+      mostrarContactos(filtro);
+    }
+
+    function limpiarCampos() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("telefono").value = "";
+      document.getElementById("etiqueta").value = "";
+    }
+
+    mostrarContactos();
+  </script>
+</body>
+</html>
+✅ 4. Estadísticas detalladas (por usuario, plan, IA usada, mensajes)
+Por ahora generamos una versión visual con datos ficticios que luego se conectará a tu base real (ej. Supabase).
+
+🔧 Archivo: estadisticas.html
+html
+Copiar
+Editar
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estadísticas</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📊 Estadísticas de Usuario</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <div><b>Usuario:</b> Angel</div>
+    <div><b>Plan actual:</b> Professional</div>
+    <div><b>Mensajes usados:</b> 2,324 / 7,500</div>
+    <div><b>Imágenes generadas:</b> 45</div>
+    <div><b>IA activa:</b> OpenAI (GPT-4)</div>
+    <div><b>Fecha de renovación:</b> 25 de agosto, 2025</div>
+  </section>
+
+  <section>
+    <h2>📈 Gráfica de Uso</h2>
+    <canvas id="grafica" width="600" height="300"></canvas>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('grafica').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jul 1', 'Jul 7', 'Jul 14', 'Jul 21', 'Jul 27'],
+        datasets: [{
+          label: 'Mensajes Enviados',
+          data: [0, 560, 900, 1400, 2324],
+          borderColor: '#00ffff',
+          backgroundColor: 'rgba(0, 255, 255, 0.2)',
+          tension: 0.3
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
+🚀 Lo que sigue:
+✅ Plantillas
+
+✅ Respuestas rápidas
+
+✅ Contactos
+
+✅ Estadísticas

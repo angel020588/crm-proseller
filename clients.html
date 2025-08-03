@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>👥 Gestión de Clientes</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>➕ Nuevo Cliente</h2>
+    <input type="text" id="nombre" placeholder="Nombre completo">
+    <input type="email" id="email" placeholder="Email">
+    <input type="tel" id="telefono" placeholder="Teléfono">
+    <input type="text" id="empresa" placeholder="Empresa (opcional)">
+    <textarea id="direccion" placeholder="Dirección"></textarea>
+    <select id="estado">
+      <option value="activo">✅ Activo</option>
+      <option value="inactivo">⏸️ Inactivo</option>
+      <option value="potencial">🎯 Potencial</option>
+    </select>
+    <input type="text" id="etiquetas" placeholder="Etiquetas separadas por comas">
+    <button onclick="agregarCliente()">💾 Agregar Cliente</button>
+  </section>
+
+  <section>
+    <h2>🔍 Buscar Clientes</h2>
+    <input type="text" id="buscar" placeholder="Buscar por nombre, email o empresa..." onkeyup="buscarClientes()">
+    <select id="filtroEstado" onchange="buscarClientes()">
+      <option value="">Todos los estados</option>
+      <option value="activo">Activos</option>
+      <option value="inactivo">Inactivos</option>
+      <option value="potencial">Potenciales</option>
+    </select>
+  </section>
+
+  <section>
+    <h2>👥 Lista de Clientes</h2>
+    <div id="lista-clientes"></div>
+  </section>
+
+  <script>
+    function agregarCliente() {
+      const nombre = document.getElementById("nombre").value;
+      const email = document.getElementById("email").value;
+      const telefono = document.getElementById("telefono").value;
+      const empresa = document.getElementById("empresa").value;
+      const direccion = document.getElementById("direccion").value;
+      const estado = document.getElementById("estado").value;
+      const etiquetas = document.getElementById("etiquetas").value;
+      
+      if (!nombre || !email || !telefono) {
+        return alert("Nombre, email y teléfono son obligatorios.");
+      }
+
+      const cliente = {
+        id: Date.now(),
+        nombre,
+        email,
+        telefono,
+        empresa,
+        direccion,
+        estado,
+        etiquetas: etiquetas ? etiquetas.split(',').map(e => e.trim()) : [],
+        fechaCreacion: new Date().toLocaleString()
+      };
+
+      // Guardar en localStorage
+      const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+      clientes.push(cliente);
+      localStorage.setItem('clientes', JSON.stringify(clientes));
+
+      alert(`👥 Cliente ${nombre} agregado exitosamente`);
+      
+      // Limpiar formulario
+      document.getElementById("nombre").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("telefono").value = "";
+      document.getElementById("empresa").value = "";
+      document.getElementById("direccion").value = "";
+      document.getElementById("etiquetas").value = "";
+      
+      mostrarClientes();
+    }
+
+    function mostrarClientes(clientesFiltrados = null) {
+      const clientes = clientesFiltrados || JSON.parse(localStorage.getItem('clientes') || '[]');
+      const contenedor = document.getElementById("lista-clientes");
+      contenedor.innerHTML = "";
+      
+      if (clientes.length === 0) {
+        contenedor.innerHTML = "<p>No hay clientes registrados.</p>";
+        return;
+      }
+
+      clientes.forEach((cliente, index) => {
+        const div = document.createElement("div");
+        div.className = "cliente-card";
+        
+        const estadoIcon = cliente.estado === 'activo' ? '✅' : 
+                          cliente.estado === 'inactivo' ? '⏸️' : '🎯';
+        
+        div.innerHTML = `
+          <div class="cliente-header">
+            <h3>${cliente.nombre} ${estadoIcon}</h3>
+            <div class="cliente-acciones">
+              <button onclick="editarCliente(${index})">✏️</button>
+              <button onclick="eliminarCliente(${index})">🗑️</button>
+            </div>
+          </div>
+          <div class="cliente-info">
+            <p><strong>📧 Email:</strong> ${cliente.email}</p>
+            <p><strong>📞 Teléfono:</strong> ${cliente.telefono}</p>
+            ${cliente.empresa ? `<p><strong>🏢 Empresa:</strong> ${cliente.empresa}</p>` : ''}
+            ${cliente.direccion ? `<p><strong>📍 Dirección:</strong> ${cliente.direccion}</p>` : ''}
+            ${cliente.etiquetas.length ? `<p><strong>🏷️ Etiquetas:</strong> ${cliente.etiquetas.join(', ')}</p>` : ''}
+            <p><strong>📅 Creado:</strong> ${cliente.fechaCreacion}</p>
+          </div>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    function buscarClientes() {
+      const busqueda = document.getElementById("buscar").value.toLowerCase();
+      const filtroEstado = document.getElementById("filtroEstado").value;
+      const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+      
+      const clientesFiltrados = clientes.filter(cliente => {
+        const cumpleBusqueda = !busqueda || 
+          cliente.nombre.toLowerCase().includes(busqueda) ||
+          cliente.email.toLowerCase().includes(busqueda) ||
+          (cliente.empresa && cliente.empresa.toLowerCase().includes(busqueda));
+        
+        const cumpleEstado = !filtroEstado || cliente.estado === filtroEstado;
+        
+        return cumpleBusqueda && cumpleEstado;
+      });
+      
+      mostrarClientes(clientesFiltrados);
+    }
+
+    function editarCliente(index) {
+      const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+      const cliente = clientes[index];
+      
+      const nuevoNombre = prompt("Nuevo nombre:", cliente.nombre);
+      if (nuevoNombre) {
+        cliente.nombre = nuevoNombre;
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        mostrarClientes();
+      }
+    }
+
+    function eliminarCliente(index) {
+      if (confirm("¿Estás seguro de eliminar este cliente?")) {
+        const clientes = JSON.parse(localStorage.getItem('clientes') || '[]');
+        clientes.splice(index, 1);
+        localStorage.setItem('clientes', JSON.stringify(clientes));
+        mostrarClientes();
+      }
+    }
+
+    // Cargar clientes al iniciar
+    mostrarClientes();
+  </script>
+</body>
+</html>

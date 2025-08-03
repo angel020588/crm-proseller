@@ -1,0 +1,132 @@
+// 📁 server/routes/quotations.js
+const express = require("express");
+const router = express.Router();
+const { Quotation, Client } = require("../models");
+const verifyToken = require("../middlewares/verifyToken");
+
+router.use(verifyToken);
+
+router.post("/", async (req, res) => {
+  const { title, content, status, total, clientId } = req.body;
+  try {
+    const quotation = await Quotation.create({
+      title,
+      content,
+      status,
+      total,
+      clientId,
+      userId: req.user.id
+    });
+    res.json(quotation);
+  } catch (err) {
+    res.status(500).json({ message: "Error al crear cotización" });
+  }
+});
+
+router.get("/", async (req, res) => {
+  const quotations = await Quotation.findAll({ where: { userId: req.user.id }, include: Client });
+  res.json(quotations);
+});
+
+module.exports = router;
+
+
+// 📁 server/routes/followups.js
+const followupRouter = express.Router();
+const { Followup, Lead } = require("../models");
+followupRouter.use(verifyToken);
+
+followupRouter.post("/", async (req, res) => {
+  const { note, scheduledAt, leadId } = req.body;
+  try {
+    const followup = await Followup.create({
+      note,
+      scheduledAt,
+      leadId,
+      userId: req.user.id
+    });
+    res.json(followup);
+  } catch (err) {
+    res.status(500).json({ message: "Error al crear seguimiento" });
+  }
+});
+
+followupRouter.get("/", async (req, res) => {
+  const followups = await Followup.findAll({ where: { userId: req.user.id }, include: Lead });
+  res.json(followups);
+});
+
+module.exports = followupRouter;
+
+
+// 📁 server/routes/notifications.js
+const notificationsRouter = express.Router();
+const { Notification } = require("../models");
+notificationsRouter.use(verifyToken);
+
+notificationsRouter.get("/", async (req, res) => {
+  const notifs = await Notification.findAll({ where: { userId: req.user.id } });
+  res.json(notifs);
+});
+
+notificationsRouter.post("/mark-read", async (req, res) => {
+  await Notification.update({ read: true }, { where: { userId: req.user.id } });
+  res.json({ message: "Notificaciones marcadas como leídas" });
+});
+
+module.exports = notificationsRouter;
+
+
+// 📁 server/routes/analytics.js
+const analyticsRouter = express.Router();
+const { Lead, Client, Quotation } = require("../models");
+const { Sequelize } = require("sequelize");
+analyticsRouter.use(verifyToken);
+
+analyticsRouter.get("/summary", async (req, res) => {
+  try {
+    const totalLeads = await Lead.count({ where: { userId: req.user.id } });
+    const totalClients = await Client.count({ where: { userId: req.user.id } });
+    const totalQuotations = await Quotation.count({ where: { userId: req.user.id } });
+
+    res.json({ totalLeads, totalClients, totalQuotations });
+  } catch (err) {
+    res.status(500).json({ message: "Error en analíticas" });
+  }
+});
+
+module.exports = analyticsRouter;
+
+
+// 📁 server/routes/account.js
+const accountRouter = express.Router();
+const { User } = require("../models");
+const bcrypt = require("bcryptjs");
+accountRouter.use(verifyToken);
+
+accountRouter.get("/me", async (req, res) => {
+  const user = await User.findByPk(req.user.id);
+  res.json({ id: user.id, name: user.name, email: user.email });
+});
+
+accountRouter.patch("/password", async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const user = await User.findByPk(req.user.id);
+  const isValid = await bcrypt.compare(currentPassword, user.password);
+  if (!isValid) return res.status(400).json({ message: "Contraseña actual incorrecta" });
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+  res.json({ message: "Contraseña actualizada" });
+});
+
+accountRouter.patch("/profile", async (req, res) => {
+  const { name, email } = req.body;
+  const user = await User.findByPk(req.user.id);
+  user.name = name || user.name;
+  user.email = email || user.email;
+  await user.save();
+  res.json({ message: "Perfil actualizado" });
+});
+
+module.exports = accountRouter;

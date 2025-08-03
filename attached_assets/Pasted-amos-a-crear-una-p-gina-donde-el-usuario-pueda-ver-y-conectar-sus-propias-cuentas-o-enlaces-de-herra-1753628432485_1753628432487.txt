@@ -1,0 +1,70 @@
+amos a crear una página donde el usuario pueda ver y conectar sus propias cuentas o enlaces de herramientas externas.
+
+🔧 Archivo: integraciones.html
+html
+Copiar
+Editar
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Integraciones</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>🔗 Integraciones Externas</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>💳 Stripe</h2>
+    <input type="text" id="stripe" placeholder="Enlace de tu portal de cliente o dashboard">
+    
+    <h2>📅 Calendly</h2>
+    <input type="text" id="calendly" placeholder="Tu enlace de Calendly (agenda de citas)">
+    
+    <h2>📧 Mailchimp</h2>
+    <input type="text" id="mailchimp" placeholder="Enlace de suscripción o campaña">
+    
+    <h2>📱 WhatsApp</h2>
+    <input type="text" id="whatsapp" placeholder="https://wa.me/52xxxxxxxxxx o link personalizado">
+    
+    <button onclick="guardarIntegraciones()">💾 Guardar Integraciones</button>
+  </section>
+
+  <section>
+    <h2>🔍 Integraciones guardadas</h2>
+    <ul id="lista-integraciones"></ul>
+  </section>
+
+  <script>
+    function guardarIntegraciones() {
+      const integraciones = {
+        stripe: document.getElementById("stripe").value,
+        calendly: document.getElementById("calendly").value,
+        mailchimp: document.getElementById("mailchimp").value,
+        whatsapp: document.getElementById("whatsapp").value
+      };
+      localStorage.setItem("integraciones", JSON.stringify(integraciones));
+      mostrarIntegraciones();
+    }
+
+    function mostrarIntegraciones() {
+      const data = JSON.parse(localStorage.getItem("integraciones")) || {};
+      const lista = document.getElementById("lista-integraciones");
+      lista.innerHTML = "";
+
+      for (const key in data) {
+        if (data[key]) {
+          const li = document.createElement("li");
+          li.innerHTML = `<b>${key.toUpperCase()}:</b> <a href="${data[key]}" target="_blank">${data[key]}</a>`;
+          lista.appendChild(li);
+        }
+      }
+    }
+
+    mostrarIntegraciones();
+  </script>
+</body>
+</html>

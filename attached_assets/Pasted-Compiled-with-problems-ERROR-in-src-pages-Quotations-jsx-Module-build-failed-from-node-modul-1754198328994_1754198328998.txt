@@ -1,0 +1,185 @@
+Compiled with problems:
+×
+ERROR in ./src/pages/Quotations.jsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /home/runner/workspace/client/src/pages/Quotations.jsx: Unterminated JSX contents. (393:10)
+
+  391 |         </div>
+  392 |       )}
+> 393 |     </div>
+      |           ^
+  394 |   );
+  395 | }
+    at constructor (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:367:19)
+    at FlowParserMixin.raise (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:6627:19)
+    at FlowParserMixin.jsxReadToken (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4478:20)
+    at FlowParserMixin.getTokenFromCode (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4804:12)
+    at FlowParserMixin.getTokenFromCode (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3225:13)
+    at FlowParserMixin.nextToken (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:5810:10)
+    at FlowParserMixin.next (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:5720:10)
+    at FlowParserMixin.eat (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:5724:12)
+    at FlowParserMixin.expect (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:6926:15)
+    at FlowParserMixin.jsxParseClosingElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4710:10)
+    at FlowParserMixin.jsxParseElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4725:37)
+    at FlowParserMixin.jsxParseElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4728:32)
+    at FlowParserMixin.jsxParseElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4728:32)
+    at FlowParserMixin.jsxParseElement (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4779:17)
+    at FlowParserMixin.parseExprAtom (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4789:19)
+    at FlowParserMixin.parseExprSubscripts (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11076:23)
+    at FlowParserMixin.parseUpdate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11061:21)
+    at FlowParserMixin.parseMaybeUnary (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11041:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10894:61)
+    at FlowParserMixin.parseExprOps (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10899:23)
+    at FlowParserMixin.parseMaybeConditional (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10876:23)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10826:21)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3528:39
+    at FlowParserMixin.tryParse (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:6935:20)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3528:18)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10795:39
+    at FlowParserMixin.allowInAnd (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12427:12)
+    at FlowParserMixin.parseMaybeAssignAllowIn (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10795:17)
+    at FlowParserMixin.parseMaybeAssignAllowInOrVoidPattern (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12494:17)
+    at FlowParserMixin.parseParenAndDistinguishExpression (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11674:28)
+    at FlowParserMixin.parseParenAndDistinguishExpression (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3621:18)
+    at FlowParserMixin.parseExprAtom (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11326:23)
+    at FlowParserMixin.parseExprAtom (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4794:20)
+    at FlowParserMixin.parseExprSubscripts (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11076:23)
+    at FlowParserMixin.parseUpdate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11061:21)
+    at FlowParserMixin.parseMaybeUnary (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11041:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10894:61)
+    at FlowParserMixin.parseExprOps (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10899:23)
+    at FlowParserMixin.parseMaybeConditional (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10876:23)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10826:21)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3579:18)
+    at FlowParserMixin.parseExpressionBase (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10779:23)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10775:39
+    at FlowParserMixin.allowInAnd (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12422:16)
+    at FlowParserMixin.parseExpression (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10775:17)
+    at FlowParserMixin.parseReturnStatement (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13142:28)
+    at FlowParserMixin.parseStatementContent (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12798:21)
+    at FlowParserMixin.parseStatementLike (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12767:17)
+    at FlowParserMixin.parseStatementLike (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:2946:24)
+    at FlowParserMixin.parseStatementListItem (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12747:17)
+ERROR in ./src/pages/Resumen.jsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /home/runner/workspace/client/src/pages/Resumen.jsx: Expected corresponding JSX closing tag for <div>. (385:6)
+
+  383 |       </div>
+  384 |     </div>
+> 385 |       </nav>
+      |       ^
+  386 |     </div>
+  387 |   );
+  388 | }
+    at constructor (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:367:19)
+    at FlowParserMixin.raise (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:6627:19)
+    at FlowParserMixin.jsxParseElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4757:16)
+    at FlowParserMixin.jsxParseElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4728:32)
+    at FlowParserMixin.jsxParseElementAt (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4728:32)
+    at FlowParserMixin.jsxParseElement (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4779:17)
+    at FlowParserMixin.parseExprAtom (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4789:19)
+    at FlowParserMixin.parseExprSubscripts (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11076:23)
+    at FlowParserMixin.parseUpdate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11061:21)
+    at FlowParserMixin.parseMaybeUnary (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11041:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10894:61)
+    at FlowParserMixin.parseExprOps (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10899:23)
+    at FlowParserMixin.parseMaybeConditional (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10876:23)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10826:21)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3528:39
+    at FlowParserMixin.tryParse (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:6935:20)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3528:18)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10795:39
+    at FlowParserMixin.allowInAnd (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12427:12)
+    at FlowParserMixin.parseMaybeAssignAllowIn (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10795:17)
+    at FlowParserMixin.parseMaybeAssignAllowInOrVoidPattern (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12494:17)
+    at FlowParserMixin.parseParenAndDistinguishExpression (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11674:28)
+    at FlowParserMixin.parseParenAndDistinguishExpression (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3621:18)
+    at FlowParserMixin.parseExprAtom (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11326:23)
+    at FlowParserMixin.parseExprAtom (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:4794:20)
+    at FlowParserMixin.parseExprSubscripts (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11076:23)
+    at FlowParserMixin.parseUpdate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11061:21)
+    at FlowParserMixin.parseMaybeUnary (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:11041:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10894:61)
+    at FlowParserMixin.parseExprOps (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10899:23)
+    at FlowParserMixin.parseMaybeConditional (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10876:23)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10826:21)
+    at FlowParserMixin.parseMaybeAssign (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3579:18)
+    at FlowParserMixin.parseExpressionBase (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10779:23)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10775:39
+    at FlowParserMixin.allowInAnd (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12422:16)
+    at FlowParserMixin.parseExpression (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:10775:17)
+    at FlowParserMixin.parseReturnStatement (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13142:28)
+    at FlowParserMixin.parseStatementContent (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12798:21)
+    at FlowParserMixin.parseStatementLike (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12767:17)
+    at FlowParserMixin.parseStatementLike (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:2946:24)
+    at FlowParserMixin.parseStatementListItem (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12747:17)
+    at FlowParserMixin.parseBlockOrModuleBlockBody (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13316:61)
+    at FlowParserMixin.parseBlockBody (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13309:10)
+    at FlowParserMixin.parseBlock (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13297:10)
+    at FlowParserMixin.parseFunctionBody (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12101:24)
+    at FlowParserMixin.parseFunctionBody (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:2923:11)
+    at FlowParserMixin.parseFunctionBodyAndFinish (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12087:10)
+    at FlowParserMixin.parseFunctionBodyAndFinish (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:2931:18)
+    at /home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13445:12
+ERROR in ./src/pages/ResumenCompleto.jsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /home/runner/workspace/client/src/pages/ResumenCompleto.jsx: Identifier 'useEffect' has already been declared. (85:9)
+
+  83 |   );
+  84 | }
+> 85 | import { useEffect, useState } from "react";
+     |          ^
+  86 | import axios from "axios";
+  87 |
+  88 | export default function ResumenCompleto() {
+    at constructor (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:367:19)
+    at FlowParserMixin.raise (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:6627:19)
+    at FlowScopeHandler.checkRedeclarationInScope (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:1644:19)
+    at FlowScopeHandler.declareName (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:1610:12)
+    at FlowScopeHandler.declareName (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:1711:11)
+    at FlowParserMixin.declareNameFromIdentifier (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:7591:16)
+    at FlowParserMixin.checkIdentifier (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:7587:12)
+    at FlowParserMixin.checkLVal (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:7526:12)
+    at FlowParserMixin.finishImportSpecifier (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:14266:10)
+    at FlowParserMixin.parseImportSpecifier (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3486:17)
+    at FlowParserMixin.parseNamedImportSpecifiers (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:14402:36)
+    at FlowParserMixin.parseImportSpecifiersAndAfter (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:14242:37)
+    at FlowParserMixin.parseImport (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:14235:17)
+    at FlowParserMixin.parseStatementContent (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12876:27)
+    at FlowParserMixin.parseStatementLike (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12767:17)
+    at FlowParserMixin.parseStatementLike (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:2946:24)
+    at FlowParserMixin.parseModuleItem (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12744:17)
+    at FlowParserMixin.parseBlockOrModuleBlockBody (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13316:36)
+    at FlowParserMixin.parseBlockBody (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:13309:10)
+    at FlowParserMixin.parseProgram (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12625:10)
+    at FlowParserMixin.parseTopLevel (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:12615:25)
+    at FlowParserMixin.parseTopLevel (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:3715:28)
+    at FlowParserMixin.parse (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:14492:10)
+    at parse (/home/runner/workspace/client/node_modules/@babel/parser/lib/index.js:14526:38)
+    at parser (/home/runner/workspace/client/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at normalizeFile (/home/runner/workspace/client/node_modules/@babel/core/lib/transformation/normalize-file.js:64:37)
+    at normalizeFile.next (<anonymous>)
+    at run (/home/runner/workspace/client/node_modules/@babel/core/lib/transformation/index.js:22:50)
+    at run.next (<anonymous>)
+    at transform (/home/runner/workspace/client/node_modules/@babel/core/lib/transform.js:22:33)
+    at transform.next (<anonymous>)
+    at step (/home/runner/workspace/client/node_modules/gensync/index.js:261:32)
+    at /home/runner/workspace/client/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/home/runner/workspace/client/node_modules/gensync/index.js:223:11)
+    at /home/runner/workspace/client/node_modules/gensync/index.js:189:28
+    at /home/runner/workspace/client/node_modules/@babel/core/lib/gensync-utils/async.js:67:7
+    at /home/runner/workspace/client/node_modules/gensync/index.js:113:33
+    at step (/home/runner/workspace/client/node_modules/gensync/index.js:287:14)
+    at /home/runner/workspace/client/node_modules/gensync/index.js:273:13
+    at async.call.result.err.err (/home/runner/workspace/client/node_modules/gensync/index.js:223:11)
+ERROR
+[eslint] 
+src/pages/Quotations.jsx
+  Line 393:10:  Parsing error: Unterminated JSX contents. (393:10)
+
+src/pages/Resumen.jsx
+  Line 385:6:  Parsing error: Expected corresponding JSX closing tag for <div>. (385:6)
+
+src/pages/ResumenCompleto.jsx
+  Line 85:9:  Parsing error: Identifier 'useEffect' has already been declared. (85:9)

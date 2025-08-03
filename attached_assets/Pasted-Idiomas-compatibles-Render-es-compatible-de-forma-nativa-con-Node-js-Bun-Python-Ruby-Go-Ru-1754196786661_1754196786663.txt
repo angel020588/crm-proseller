@@ -1,0 +1,89 @@
+Idiomas compatibles
+Render es compatible de forma nativa con Node.js / Bun , Python , Ruby , Go , Rust y Elixir .creando un servicio, simplemente vincule su repositorio de GitHub/GitLab/Bitbucket, elija el entorno de ejecución para su idioma y especifique una rama para implementar.
+
+Además, puedes usar prácticamente cualquier lenguaje de programación siImplementa tu código como una imagen de Docker.
+
+Establezca su versión de idioma
+De forma predeterminada, Render utiliza una versión reciente y con soporte activo de cada idioma nativo compatible (enumerados en la siguiente tabla).
+
+Sin embargo, recomendamos configurar una versión de idioma para su servicio. Esto le ayudará a garantizar un comportamiento consistente entre Render y sus otros entornos (como el de desarrollo).
+
+Consulte la tabla para saber cómo configurar su versión de idioma:
+
+Idioma	Versión predeterminada*	Cómo configurar una versión
+Node.js
+
+22.16.0	
+Establezca elNODE_VERSION variable de entorno, o agregue un .node-versionarchivo a la raíz de su proyecto que contenga solo el número de versión:
+
+21.1.0
+Para opciones adicionales, consulteConfiguración de su versión de Node.js.
+
+Bollo
+
+1.1.0	
+Establezca elBUN_VERSION variable de entorno:
+
+1.1.0
+Pitón
+
+3.13.4	
+Establezca elPYTHON_VERSION variable de entorno, o agregue un .python-versionarchivo a la raíz de su proyecto que contenga solo el número de versión:
+
+3.12.11
+Para más detalles, véaseConfiguración de su versión de Python.
+
+También puede configurar versiones para las siguientes herramientas de administración de paquetes:
+
+ultravioleta
+Poesía
+Rubí
+
+3.4.4	
+Colocarla rubydirectivaen su Gemfile, o agregue un .ruby-versionarchivo a la raíz de su proyecto que contenga solo el número de versión:
+
+3.1.4
+Para más detalles, véaseConfiguración de su versión de Ruby.
+
+Ir	1.24	
+El entorno Go nativo de Render siempre usa la última 1.xversión estable de Go. No se puede configurar una versión diferente a menos que se implemente unImagen de Docker.
+
+Óxido
+
+stable	
+Establezca elRUSTUP_TOOLCHAIN variable de entorno, o agregue un rust-toolchainarchivo a la raíz de su proyecto que contenga solo la versión de la cadena de herramientas:
+
+beta
+Para más detalles, véaseEspecificación de una cadena de herramientas de Rust.
+
+Elixir
+
+1.18.4	
+Establezca el ELIXIR_VERSIONy/oERLANG_VERSION variables de entorno.
+
+Si no configura ERLANG_VERSION, Render usa automáticamente una versión de Erlang que sea compatible con su ELIXIR_VERSION.
+
+Para más detalles, véaseConfiguración de sus versiones de Elixir y Erlang.
+
+Otros idiomas
+
+N / A	
+Para utilizar cualquier idioma además de los enumerados anteriormente, implemente su código como unImagen de Docker.
+
+*Render actualiza la versión predeterminada para cada idioma con el tiempo.
+
+Con la excepción de Go y Rust, la versión de idioma predeterminada de un servicio depende de cuándo se creó. Para más información, consulte la documentación de la versión de su idioma (enlace desde la tabla anterior).
+
+Versiones mínimas de idiomas admitidas
+Los servicios de renderizado no pueden utilizar versiones de ciertos idiomas anteriores a las que se enumeran a continuación:
+
+Idioma	Versión mínima compatible
+Pitón	3.7.3
+Rubí	3.1.0
+Elixir	1.12.0
+Erlang	24.3.4
+Render actualiza periódicamente la versión subyacente de Debian utilizada por todos los servicios.
+
+Las versiones de idioma anteriores corresponden a las versiones mínimas compatibles con Debian 12.xratón de biblioteca.
+
+Compatibilidad con Docker

@@ -1,0 +1,100 @@
+// 📁 client/src/pages/Clients.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+
+export default function Clients() {
+  const [clients, setClients] = useState([]);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchClients = async () => {
+    try {
+      const res = await axios.get("/api/clients", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setClients(res.data);
+    } catch (err) {
+      setError("Error al cargar clientes");
+    }
+  };
+
+  const createClient = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        "/api/clients",
+        { name, email, phone, address },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setName(""); setEmail(""); setPhone(""); setAddress("");
+      fetchClients();
+    } catch (err) {
+      setError("Error al crear cliente");
+    }
+  };
+
+  const deleteClient = async (id) => {
+    if (!window.confirm("¿Eliminar este cliente?")) return;
+    try {
+      await axios.delete(`/api/clients/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchClients();
+    } catch (err) {
+      setError("Error al eliminar cliente");
+    }
+  };
+
+  useEffect(() => { fetchClients(); }, []);
+
+  return (
+    <div className="p-6 min-h-screen bg-gradient-to-r from-slate-50 to-blue-100 text-gray-900">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-extrabold tracking-tight">👥 Clientes</h1>
+        <Link
+          to="/"
+          className="text-blue-600 hover:underline font-medium text-sm"
+        >
+          Volver al Panel Principal
+        </Link>
+      </div>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <form onSubmit={createClient} className="bg-white p-6 rounded-xl shadow-md mb-8 border border-blue-200">
+        <h2 className="text-xl font-semibold mb-4">Agregar nuevo cliente</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Nombre completo" value={name} onChange={(e) => setName(e.target.value)} required className="border border-blue-300 p-3 rounded-lg" />
+          <input type="email" placeholder="Correo electrónico" value={email} onChange={(e) => setEmail(e.target.value)} className="border border-blue-300 p-3 rounded-lg" />
+          <input type="text" placeholder="Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)} className="border border-blue-300 p-3 rounded-lg" />
+          <input type="text" placeholder="Dirección completa" value={address} onChange={(e) => setAddress(e.target.value)} className="border border-blue-300 p-3 rounded-lg" />
+        </div>
+        <button type="submit" className="mt-6 bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold">
+          Guardar Cliente
+        </button>
+      </form>
+
+      <h2 className="text-xl font-bold mb-4">📋 Lista de clientes</h2>
+      <ul className="space-y-4">
+        {clients.map((client) => (
+          <li key={client.id} className="bg-white p-5 rounded-xl shadow flex justify-between items-start border border-gray-200">
+            <div>
+              <p className="text-lg font-semibold text-blue-900">{client.name}</p>
+              <p className="text-sm text-gray-600">📧 {client.email} — 📞 {client.phone}</p>
+              <p className="text-sm text-gray-700 mt-1">📍 {client.address}</p>
+            </div>
+            <button onClick={() => deleteClient(client.id)} className="text-red-600 hover:underline font-medium text-sm">
+              Eliminar
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

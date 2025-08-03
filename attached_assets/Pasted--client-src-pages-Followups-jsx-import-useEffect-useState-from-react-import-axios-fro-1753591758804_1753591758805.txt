@@ -1,0 +1,90 @@
+// 📁 client/src/pages/Followups.jsx
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+export default function Followups() {
+  const [followups, setFollowups] = useState([]);
+  const [note, setNote] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [leadId, setLeadId] = useState("");
+  const [leads, setLeads] = useState([]);
+  const [error, setError] = useState("");
+
+  const token = localStorage.getItem("token");
+
+  const fetchFollowups = async () => {
+    try {
+      const res = await axios.get("/api/followups", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFollowups(res.data);
+    } catch (err) {
+      setError("Error al cargar seguimientos");
+    }
+  };
+
+  const fetchLeads = async () => {
+    try {
+      const res = await axios.get("/api/leads", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setLeads(res.data);
+    } catch (err) {
+      setError("Error al cargar leads");
+    }
+  };
+
+  const createFollowup = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        "/api/followups",
+        { note, scheduledAt, leadId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNote(""); setScheduledAt(""); setLeadId("");
+      fetchFollowups();
+    } catch (err) {
+      setError("Error al crear seguimiento");
+    }
+  };
+
+  useEffect(() => {
+    fetchFollowups();
+    fetchLeads();
+  }, []);
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Seguimientos</h1>
+
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+
+      <form onSubmit={createFollowup} className="bg-white p-4 rounded shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="text" placeholder="Nota" value={note} onChange={(e) => setNote(e.target.value)} required className="border p-2 rounded" />
+          <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} required className="border p-2 rounded" />
+          <select value={leadId} onChange={(e) => setLeadId(e.target.value)} required className="border p-2 rounded">
+            <option value="">Selecciona Lead</option>
+            {leads.map(lead => (
+              <option key={lead.id} value={lead.id}>{lead.name}</option>
+            ))}
+          </select>
+        </div>
+        <button type="submit" className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Crear Seguimiento
+        </button>
+      </form>
+
+      <ul className="space-y-3">
+        {followups.map((f) => (
+          <li key={f.id} className="bg-white p-4 rounded shadow">
+            <p className="font-bold">{f.note}</p>
+            <p className="text-sm text-gray-600">Lead: {f.Lead?.name || "Sin nombre"}</p>
+            <p className="text-sm">Programado: {new Date(f.scheduledAt).toLocaleString()}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

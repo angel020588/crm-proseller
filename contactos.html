@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Contactos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📇 Contactos</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <input type="text" id="nombre" placeholder="Nombre del contacto">
+    <input type="text" id="telefono" placeholder="Teléfono">
+    <input type="text" id="etiqueta" placeholder="Etiqueta (ej. interesado, cliente, soporte)">
+    <button onclick="agregarContacto()">💾 Guardar contacto</button>
+  </section>
+
+  <section>
+    <h2>📌 Filtrar por etiqueta</h2>
+    <input type="text" id="filtro" placeholder="Ej: cliente" oninput="filtrarContactos()">
+  </section>
+
+  <section>
+    <h2>📋 Lista de Contactos</h2>
+    <ul id="lista-contactos"></ul>
+  </section>
+
+  <script>
+    function agregarContacto() {
+      const nombre = document.getElementById("nombre").value;
+      const telefono = document.getElementById("telefono").value;
+      const etiqueta = document.getElementById("etiqueta").value.toLowerCase();
+
+      if (!nombre || !telefono) return alert("Nombre y teléfono son obligatorios.");
+
+      const contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+      contactos.push({ 
+        id: Date.now(),
+        nombre, 
+        telefono, 
+        etiqueta,
+        fechaCreacion: new Date().toLocaleDateString('es-ES')
+      });
+      localStorage.setItem("contactos", JSON.stringify(contactos));
+      limpiarCampos();
+      mostrarContactos();
+    }
+
+    function mostrarContactos(filtrar = "") {
+      const lista = document.getElementById("lista-contactos");
+      const contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+      lista.innerHTML = "";
+
+      contactos
+        .filter(c => filtrar === "" || c.etiqueta.includes(filtrar.toLowerCase()))
+        .forEach(c => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div>
+              <b>${c.nombre}</b> - ${c.telefono} 
+              <span class="etiqueta">[${c.etiqueta}]</span>
+              <small style="color: #888;">Agregado: ${c.fechaCreacion}</small>
+            </div>
+            <button onclick="eliminarContacto(${c.id})" style="background-color: #ff4444;">🗑️ Eliminar</button>
+          `;
+          lista.appendChild(li);
+        });
+    }
+
+    function eliminarContacto(id) {
+      const contactos = JSON.parse(localStorage.getItem("contactos")) || [];
+      const contactosActualizados = contactos.filter(c => c.id !== id);
+      localStorage.setItem("contactos", JSON.stringify(contactosActualizados));
+      mostrarContactos();
+    }
+
+    function filtrarContactos() {
+      const filtro = document.getElementById("filtro").value;
+      mostrarContactos(filtro);
+    }
+
+    function limpiarCampos() {
+      document.getElementById("nombre").value = "";
+      document.getElementById("telefono").value = "";
+      document.getElementById("etiqueta").value = "";
+    }
+
+    mostrarContactos();
+  </script>
+</body>
+</html>

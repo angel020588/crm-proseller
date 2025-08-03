@@ -1,0 +1,26 @@
+// middlewares/checkApiKey.js
+const { ApiKey } = require("../models");
+
+const checkApiKey = async (req, res, next) => {
+  const key = req.headers["x-api-key"];
+
+  if (!key) {
+    return res.status(401).json({ message: "API Key requerida" });
+  }
+
+  try {
+    const apiKey = await ApiKey.findOne({ where: { key, isActive: true } });
+
+    if (!apiKey) {
+      return res.status(403).json({ message: "API Key inválida o inactiva" });
+    }
+
+    req.apiKey = apiKey;
+    next();
+  } catch (error) {
+    console.error("Error validando API Key:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+module.exports = checkApiKey;

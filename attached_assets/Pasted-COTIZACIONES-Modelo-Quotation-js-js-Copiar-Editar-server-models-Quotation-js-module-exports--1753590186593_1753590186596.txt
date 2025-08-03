@@ -1,0 +1,101 @@
+COTIZACIONES
+🔹 Modelo Quotation.js
+js
+Copiar
+Editar
+// server/models/Quotation.js
+module.exports = (sequelize, DataTypes) => {
+  const Quotation = sequelize.define("Quotation", {
+    title: { type: DataTypes.STRING, allowNull: false },
+    content: { type: DataTypes.TEXT },
+    status: { type: DataTypes.STRING, defaultValue: "pendiente" }, // enviada, aceptada, cancelada
+    total: { type: DataTypes.FLOAT }
+  });
+
+  Quotation.associate = (models) => {
+    Quotation.belongsTo(models.Client, { foreignKey: "clientId" });
+    Quotation.belongsTo(models.User, { foreignKey: "userId" });
+  };
+
+  return Quotation;
+};
+➡️ También recuerda agregarla en models/index.js:
+
+js
+Copiar
+Editar
+db.Quotation = require("./Quotation")(sequelize, DataTypes);
+4. SEGUIMIENTOS Y AUTOMATIZACIONES
+🔹 Modelo Followup.js (si aún no lo tienes completo)
+js
+Copiar
+Editar
+// server/models/Followup.js
+module.exports = (sequelize, DataTypes) => {
+  const Followup = sequelize.define("Followup", {
+    note: DataTypes.STRING,
+    scheduledAt: DataTypes.DATE,
+    completed: { type: DataTypes.BOOLEAN, defaultValue: false }
+  });
+
+  Followup.associate = (models) => {
+    Followup.belongsTo(models.Lead, { foreignKey: "leadId" });
+    Followup.belongsTo(models.User, { foreignKey: "userId" });
+  };
+
+  return Followup;
+};
+➡️ Agrega en models/index.js:
+
+js
+Copiar
+Editar
+db.Followup = require("./Followup")(sequelize, DataTypes);
+5. NOTIFICACIONES
+🔹 Modelo Notification.js
+js
+Copiar
+Editar
+// server/models/Notification.js
+module.exports = (sequelize, DataTypes) => {
+  const Notification = sequelize.define("Notification", {
+    message: { type: DataTypes.STRING, allowNull: false },
+    type: { type: DataTypes.STRING, defaultValue: "info" }, // success, warning, error
+    read: { type: DataTypes.BOOLEAN, defaultValue: false }
+  });
+
+  Notification.associate = (models) => {
+    Notification.belongsTo(models.User, { foreignKey: "userId" });
+  };
+
+  return Notification;
+};
+➡️ Regístralo también en index.js.
+
+6. CONFIGURACIÓN DE CUENTA
+Este no necesita modelo nuevo, pero sí:
+
+Rutas para GET /api/me
+
+PATCH /api/account/password
+
+PATCH /api/account/profile
+
+Te puedo preparar las rutas base ya.
+
+7. ANALYTICS
+Este es un módulo lógico, no un modelo.
+
+Ruta recomendada: GET /api/analytics
+Puedes hacer consultas como:
+
+js
+Copiar
+Editar
+const totalLeads = await Lead.count({ where: { userId } });
+const leadsPorMes = await Lead.findAll({
+  attributes: [[Sequelize.fn('DATE_TRUNC', 'month', Sequelize.col('createdAt')), 'mes'], [Sequelize.fn('COUNT', '*'), 'total']],
+  group: ['mes'],
+  where: { userId }
+});
+Y enviar la respuesta agrupada.

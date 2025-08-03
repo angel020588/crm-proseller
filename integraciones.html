@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Integraciones</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>🔗 Integraciones Externas</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>💳 Stripe</h2>
+    <input type="text" id="stripe" placeholder="Enlace de tu portal de cliente o dashboard">
+    
+    <h2>📅 Calendly</h2>
+    <input type="text" id="calendly" placeholder="Tu enlace de Calendly (agenda de citas)">
+    
+    <h2>📧 Mailchimp</h2>
+    <input type="text" id="mailchimp" placeholder="Enlace de suscripción o campaña">
+    
+    <h2>📱 WhatsApp</h2>
+    <input type="text" id="whatsapp" placeholder="https://wa.me/52xxxxxxxxxx o link personalizado">
+    
+    <button onclick="guardarIntegraciones()">💾 Guardar Integraciones</button>
+  </section>
+
+  <section>
+    <h2>🔍 Integraciones guardadas</h2>
+    <ul id="lista-integraciones"></ul>
+  </section>
+
+  <section>
+    <h2>🚀 Acciones rápidas</h2>
+    <div class="acciones-grid">
+      <button onclick="abrirIntegracion('stripe')" class="accion-btn stripe">
+        💳 Abrir Stripe
+      </button>
+      <button onclick="abrirIntegracion('calendly')" class="accion-btn calendly">
+        📅 Abrir Calendly
+      </button>
+      <button onclick="abrirIntegracion('mailchimp')" class="accion-btn mailchimp">
+        📧 Abrir Mailchimp
+      </button>
+      <button onclick="abrirIntegracion('whatsapp')" class="accion-btn whatsapp">
+        📱 Abrir WhatsApp
+      </button>
+    </div>
+  </section>
+
+  <script>
+    function guardarIntegraciones() {
+      const integraciones = {
+        stripe: document.getElementById("stripe").value,
+        calendly: document.getElementById("calendly").value,
+        mailchimp: document.getElementById("mailchimp").value,
+        whatsapp: document.getElementById("whatsapp").value
+      };
+      
+      localStorage.setItem("integraciones", JSON.stringify(integraciones));
+      mostrarIntegraciones();
+      alert("✅ Integraciones guardadas correctamente");
+      
+      // Limpiar campos después de guardar
+      document.getElementById("stripe").value = "";
+      document.getElementById("calendly").value = "";
+      document.getElementById("mailchimp").value = "";
+      document.getElementById("whatsapp").value = "";
+    }
+
+    function mostrarIntegraciones() {
+      const data = JSON.parse(localStorage.getItem("integraciones")) || {};
+      const lista = document.getElementById("lista-integraciones");
+      lista.innerHTML = "";
+
+      for (const key in data) {
+        if (data[key]) {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <div>
+              <b>${getServiceName(key)}:</b> 
+              <a href="${data[key]}" target="_blank" class="integration-link">${data[key]}</a>
+            </div>
+            <button onclick="eliminarIntegracion('${key}')" style="background-color: #ff4444;">
+              🗑️ Eliminar
+            </button>
+          `;
+          lista.appendChild(li);
+        }
+      }
+    }
+
+    function getServiceName(key) {
+      const names = {
+        stripe: "💳 Stripe",
+        calendly: "📅 Calendly", 
+        mailchimp: "📧 Mailchimp",
+        whatsapp: "📱 WhatsApp"
+      };
+      return names[key] || key.toUpperCase();
+    }
+
+    function eliminarIntegracion(servicio) {
+      const data = JSON.parse(localStorage.getItem("integraciones")) || {};
+      delete data[servicio];
+      localStorage.setItem("integraciones", JSON.stringify(data));
+      mostrarIntegraciones();
+    }
+
+    function abrirIntegracion(servicio) {
+      const data = JSON.parse(localStorage.getItem("integraciones")) || {};
+      if (data[servicio]) {
+        window.open(data[servicio], '_blank');
+      } else {
+        alert(`❌ No tienes configurada la integración de ${getServiceName(servicio)}`);
+      }
+    }
+
+    // Cargar integraciones existentes en los campos
+    function cargarEnCampos() {
+      const data = JSON.parse(localStorage.getItem("integraciones")) || {};
+      document.getElementById("stripe").value = data.stripe || "";
+      document.getElementById("calendly").value = data.calendly || "";
+      document.getElementById("mailchimp").value = data.mailchimp || "";
+      document.getElementById("whatsapp").value = data.whatsapp || "";
+    }
+
+    mostrarIntegraciones();
+    cargarEnCampos();
+  </script>
+
+  <style>
+    .acciones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .accion-btn {
+      padding: 15px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: white;
+    }
+
+    .accion-btn.stripe {
+      background-color: #635bff;
+    }
+
+    .accion-btn.calendly {
+      background-color: #006bff;
+    }
+
+    .accion-btn.mailchimp {
+      background-color: #ffe01b;
+      color: #000;
+    }
+
+    .accion-btn.whatsapp {
+      background-color: #25d366;
+    }
+
+    .accion-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+    }
+
+    .integration-link {
+      color: #00ffff;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .integration-link:hover {
+      text-decoration: underline;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    li div {
+      flex: 1;
+      margin-right: 10px;
+    }
+  </style>
+</body>
+</html>

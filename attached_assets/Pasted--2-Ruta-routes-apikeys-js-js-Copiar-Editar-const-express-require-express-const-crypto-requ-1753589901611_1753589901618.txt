@@ -1,0 +1,91 @@
+✅ 2. Ruta routes/apikeys.js
+js
+Copiar
+Editar
+const express = require("express");
+const crypto = require("crypto");
+const router = express.Router();
+const { ApiKey } = require("../models");
+const verifyToken = require("../middlewares/verifyToken");
+
+// Crear nueva API key
+router.post("/create", verifyToken, async (req, res) => {
+  try {
+    const randomKey = crypto.randomBytes(32).toString("hex");
+    const { description } = req.body;
+
+    const newKey = await ApiKey.create({
+      key: randomKey,
+      description,
+      userId: req.user.id,
+    });
+
+    res.json({ message: "API key creada", key: newKey.key });
+  } catch (err) {
+    console.error("❌ Error al crear API key:", err);
+    res.status(500).json({ message: "Error interno" });
+  }
+});
+
+// Listar API keys del usuario
+router.get("/", verifyToken, async (req, res) => {
+  const keys = await ApiKey.findAll({ where: { userId: req.user.id } });
+  res.json(keys);
+});
+
+// Desactivar API key
+router.post("/deactivate", verifyToken, async (req, res) => {
+  const { key } = req.body;
+  const apiKey = await ApiKey.findOne({ where: { key, userId: req.user.id } });
+
+  if (!apiKey) return res.status(404).json({ message: "API key no encontrada" });
+
+  apiKey.active = false;
+  await apiKey.save();
+
+  res.json({ message: "API key desactivada" });
+});
+
+module.exports = router;
+✅ 3. Middleware checkApiKey.js
+js
+Copiar
+Editar
+// server/middlewares/checkApiKey.js
+const { ApiKey, User } = require("../models");
+
+const checkApiKey = async (req, res, next) => {
+  const apiKey = req.headers["x-api-key"];
+  if (!apiKey) return res.status(401).json({ message: "API key requerida" });
+
+  const key = await ApiKey.findOne({ where: { key: apiKey, active: true }, include: User });
+  if (!key) return res.status(403).json({ message: "API key inválida o inactiva" });
+
+  req.user = {
+    id: key.User.id,
+    email: key.User.email,
+    role: key.User.roleId,
+  };
+
+  next();
+};
+
+module.exports = checkApiKey;
+✅ 4. Usar checkApiKey en rutas públicas opcionales
+Ejemplo para permitir acceso con x-api-key en alguna ruta externa:
+
+js
+Copiar
+Editar
+const checkApiKey = require("../middlewares/checkApiKey");
+
+router.get("/cotizaciones-publicas", checkApiKey, async (req, res) => {
+  const cotizaciones = await Cotizacion.findAll({ where: { userId: req.user.id } });
+  res.json(cotizaciones);
+});
+✅ 5. Agregar ruta en index.js
+js
+Copiar
+Editar
+const apiKeyRoutes = require("./routes/apikeys");
+app.use("/api/apikeys", apiKeyRoutes);

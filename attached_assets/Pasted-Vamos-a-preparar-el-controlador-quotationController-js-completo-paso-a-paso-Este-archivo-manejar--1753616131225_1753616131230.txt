@@ -1,0 +1,111 @@
+Vamos a preparar el controlador quotationController.js completo paso a paso. Este archivo manejará:
+
+📄 Crear cotización
+
+🗂️ Obtener todas las cotizaciones de un usuario
+
+✏️ Editar cotización
+
+🗑️ Eliminar cotización
+
+✅ Opcional: Cambiar estatus (aprobado, rechazado, etc.)
+
+📁 server/controllers/quotationController.js
+js
+Copiar
+Editar
+const { Quotation, User } = require("../models");
+
+// Crear nueva cotización
+exports.createQuotation = async (req, res) => {
+  try {
+    const { clientName, total, status, notes, products } = req.body;
+
+    if (!clientName || !total || !Array.isArray(products)) {
+      return res.status(400).json({ message: "Campos requeridos faltantes" });
+    }
+
+    const quotation = await Quotation.create({
+      clientName,
+      total,
+      status: status || "pendiente",
+      notes: notes || "",
+      products,
+      userId: req.user.id
+    });
+
+    res.status(201).json({ message: "Cotización creada", quotation });
+
+  } catch (error) {
+    console.error("❌ Error al crear cotización:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+// Obtener todas las cotizaciones del usuario actual
+exports.getUserQuotations = async (req, res) => {
+  try {
+    const quotations = await Quotation.findAll({
+      where: { userId: req.user.id },
+      order: [["createdAt", "DESC"]]
+    });
+
+    res.json(quotations);
+
+  } catch (error) {
+    console.error("❌ Error al obtener cotizaciones:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+// Editar una cotización
+exports.updateQuotation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { clientName, total, status, notes, products } = req.body;
+
+    const quotation = await Quotation.findOne({
+      where: { id, userId: req.user.id }
+    });
+
+    if (!quotation) {
+      return res.status(404).json({ message: "Cotización no encontrada" });
+    }
+
+    await quotation.update({
+      clientName,
+      total,
+      status,
+      notes,
+      products
+    });
+
+    res.json({ message: "Cotización actualizada", quotation });
+
+  } catch (error) {
+    console.error("❌ Error al actualizar cotización:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+// Eliminar cotización
+exports.deleteQuotation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const quotation = await Quotation.findOne({
+      where: { id, userId: req.user.id }
+    });
+
+    if (!quotation) {
+      return res.status(404).json({ message: "Cotización no encontrada" });
+    }
+
+    await quotation.destroy();
+    res.json({ message: "Cotización eliminada correctamente" });
+
+  } catch (error) {
+    console.error("❌ Error al eliminar cotización:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};

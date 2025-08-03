@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Seguimientos</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>📅 Gestión de Seguimientos</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar</button>
+  </header>
+
+  <section>
+    <h2>➕ Nuevo Seguimiento</h2>
+    <input type="text" id="cliente" placeholder="Nombre del cliente">
+    <select id="tipo">
+      <option value="llamada">📞 Llamada</option>
+      <option value="email">📧 Email</option>
+      <option value="whatsapp">💬 WhatsApp</option>
+      <option value="reunion">🤝 Reunión</option>
+    </select>
+    <input type="datetime-local" id="fecha">
+    <textarea id="notas" placeholder="Notas del seguimiento"></textarea>
+    <select id="prioridad">
+      <option value="baja">🟢 Baja</option>
+      <option value="media">🟡 Media</option>
+      <option value="alta">🔴 Alta</option>
+    </select>
+    <button onclick="crearSeguimiento()">💾 Programar Seguimiento</button>
+  </section>
+
+  <section>
+    <h2>📋 Seguimientos Programados</h2>
+    <div id="filtros">
+      <button onclick="filtrarSeguimientos('todos')">Todos</button>
+      <button onclick="filtrarSeguimientos('pendiente')">Pendientes</button>
+      <button onclick="filtrarSeguimientos('completado')">Completados</button>
+    </div>
+    <ul id="lista-seguimientos"></ul>
+  </section>
+
+  <script>
+    function crearSeguimiento() {
+      const cliente = document.getElementById("cliente").value;
+      const tipo = document.getElementById("tipo").value;
+      const fecha = document.getElementById("fecha").value;
+      const notas = document.getElementById("notas").value;
+      const prioridad = document.getElementById("prioridad").value;
+      
+      if (!cliente || !fecha || !notas) {
+        return alert("Llena todos los campos obligatorios.");
+      }
+
+      const seguimiento = {
+        cliente,
+        tipo,
+        fecha,
+        notas,
+        prioridad,
+        estado: 'pendiente',
+        creado: new Date().toLocaleString()
+      };
+
+      // Guardar en localStorage
+      const seguimientos = JSON.parse(localStorage.getItem('seguimientos') || '[]');
+      seguimientos.push(seguimiento);
+      localStorage.setItem('seguimientos', JSON.stringify(seguimientos));
+
+      alert(`📅 Seguimiento programado para ${cliente}`);
+      
+      // Limpiar formulario
+      document.getElementById("cliente").value = "";
+      document.getElementById("fecha").value = "";
+      document.getElementById("notas").value = "";
+      
+      cargarSeguimientos();
+    }
+
+    function cargarSeguimientos(filtro = 'todos') {
+      const seguimientos = JSON.parse(localStorage.getItem('seguimientos') || '[]');
+      const lista = document.getElementById("lista-seguimientos");
+      lista.innerHTML = "";
+      
+      const seguimientosFiltrados = filtro === 'todos' ? seguimientos : 
+        seguimientos.filter(seg => seg.estado === filtro);
+      
+      seguimientosFiltrados.forEach((seg, index) => {
+        const li = document.createElement("li");
+        const fechaFormateada = new Date(seg.fecha).toLocaleString();
+        const prioridadIcon = seg.prioridad === 'alta' ? '🔴' : seg.prioridad === 'media' ? '🟡' : '🟢';
+        
+        li.innerHTML = `
+          <div>
+            <strong>${seg.cliente}</strong> ${prioridadIcon}
+            <span class="tipo">${getTipoIcon(seg.tipo)} ${seg.tipo}</span>
+            <div class="fecha">${fechaFormateada}</div>
+            <div class="notas">${seg.notas}</div>
+            <div class="acciones">
+              ${seg.estado === 'pendiente' ? 
+                `<button onclick="marcarCompletado(${index})">✅ Completar</button>` : 
+                '<span class="completado">✅ Completado</span>'
+              }
+              <button onclick="eliminarSeguimiento(${index})">🗑️</button>
+            </div>
+          </div>
+        `;
+        lista.appendChild(li);
+      });
+    }
+
+    function getTipoIcon(tipo) {
+      const icons = {
+        'llamada': '📞',
+        'email': '📧',
+        'whatsapp': '💬',
+        'reunion': '🤝'
+      };
+      return icons[tipo] || '📝';
+    }
+
+    function marcarCompletado(index) {
+      const seguimientos = JSON.parse(localStorage.getItem('seguimientos') || '[]');
+      seguimientos[index].estado = 'completado';
+      localStorage.setItem('seguimientos', JSON.stringify(seguimientos));
+      cargarSeguimientos();
+    }
+
+    function eliminarSeguimiento(index) {
+      const seguimientos = JSON.parse(localStorage.getItem('seguimientos') || '[]');
+      seguimientos.splice(index, 1);
+      localStorage.setItem('seguimientos', JSON.stringify(seguimientos));
+      cargarSeguimientos();
+    }
+
+    function filtrarSeguimientos(filtro) {
+      cargarSeguimientos(filtro);
+    }
+
+    // Cargar seguimientos al iniciar
+    cargarSeguimientos();
+  </script>
+</body>
+</html>

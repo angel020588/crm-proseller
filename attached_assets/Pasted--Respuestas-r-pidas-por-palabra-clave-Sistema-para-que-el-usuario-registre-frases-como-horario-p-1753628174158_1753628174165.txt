@@ -1,0 +1,108 @@
+ Respuestas rápidas por palabra clave
+Sistema para que el usuario registre frases como “horario”, “precio” y se asocie una respuesta automática.
+
+🔧 Archivo: respuestas.html
+html
+Copiar
+Editar
+<!-- respuestas.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Respuestas Rápidas</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <h1>⚡ Respuestas Rápidas</h1>
+    <button onclick="window.location.href='index.html'">🏠 Regresar al menú</button>
+  </header>
+
+  <section>
+    <input type="text" id="clave" placeholder="Palabra clave (ej. horario)">
+    <textarea id="respuesta" placeholder="Respuesta asociada..."></textarea>
+    <button onclick="guardarRespuesta()">💾 Guardar Respuesta</button>
+  </section>
+
+  <section>
+    <h2>💬 Lista de respuestas</h2>
+    <ul id="lista-respuestas"></ul>
+  </section>
+
+  <script>
+    function guardarRespuesta() {
+      const clave = document.getElementById("clave").value.toLowerCase();
+      const respuesta = document.getElementById("respuesta").value;
+      if (!clave || !respuesta) return alert("Llena ambos campos.");
+
+      const respuestas = JSON.parse(localStorage.getItem("respuestasRapidas")) || {};
+      respuestas[clave] = respuesta;
+      localStorage.setItem("respuestasRapidas", JSON.stringify(respuestas));
+      mostrarRespuestas();
+      document.getElementById("clave").value = "";
+      document.getElementById("respuesta").value = "";
+    }
+
+    function mostrarRespuestas() {
+      const lista = document.getElementById("lista-respuestas");
+      const respuestas = JSON.parse(localStorage.getItem("respuestasRapidas")) || {};
+      lista.innerHTML = "";
+      Object.keys(respuestas).forEach(clave => {
+        const li = document.createElement("li");
+        li.innerHTML = `<b>${clave}:</b> ${respuestas[clave]}`;
+        lista.appendChild(li);
+      });
+    }
+
+    mostrarRespuestas();
+  </script>
+</body>
+</html>
+🎨 Estilo visual compartido (estilos.css)
+Aquí te va una base profesional que puedes aplicar en ambos:
+
+css
+Copiar
+Editar
+body {
+  background-color: #0b0d11;
+  color: #ffffff;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+textarea, input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #1c1c1c;
+  color: #ffffff;
+  border: 1px solid #00ffff;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #00ffff;
+  color: #0b0d11;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #00c0c0;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
