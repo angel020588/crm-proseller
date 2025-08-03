@@ -3,10 +3,10 @@ const router = express.Router();
 
 // Importar controladores
 const { 
-  createRole, 
-  getAllRoles, 
-  updateRole, 
-  deleteRole 
+  crearRol: createRole, 
+  getRoles: getAllRoles, 
+  actualizarRol: updateRole, 
+  eliminarRol: deleteRole 
 } = require('../controllers/rolesController');
 
 // Importar modelos desde models/index.js  
