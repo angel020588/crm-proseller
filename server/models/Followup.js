@@ -1,4 +1,5 @@
 
+
 // server/models/Followup.js
 module.exports = (sequelize, DataTypes) => {
   const Followup = sequelize.define('Followup', {

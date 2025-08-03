@@ -1,4 +1,5 @@
 
+
 // server/models/Client.js
 module.exports = (sequelize, DataTypes) => {
   const Client = sequelize.define('Client', {
