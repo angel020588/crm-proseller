@@ -420,6 +420,6 @@ export default function Resumen() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
