@@ -28,12 +28,11 @@ const debugRoutes = require('./routes/debug');
 
 const app = express();
 
-// Middleware
-app.use(cors());
-
 // Webhook route (debe ir ANTES de express.json() para recibir raw body)
 app.use('/api/webhook', webhookRoutes);
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -67,7 +66,6 @@ app.use("/api/automation", require("./routes/automation"));
 app.use("/api/roles", require("./routes/roles"));
 app.use("/api/ping", require("./routes/ping"));
 app.use("/api/debug", require("./routes/debug"));
-app.use("/api/webhook", require("./routes/webhook"));
 app.use("/api/subscriptions", require("./routes/subscriptions"));
 app.use("/api/custom-fields", require("./routes/custom-fields"));
 app.use("/api/contactos-telefonicos", require("./routes/contactos-telefonicos"));
