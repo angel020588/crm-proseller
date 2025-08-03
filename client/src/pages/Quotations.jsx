@@ -391,10 +391,10 @@ export default function Quotations() {
           </div>
         </div>
       )}
-    </div>
-      </div>
-      </div>
-    </div>
-    </>
-  );
-}
+          return (
+            <>
+              <div>
+                {/* ...todo tu contenido */}
+              </div>
+            </>
+          )
