@@ -89,4 +89,32 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Ruta para recuperación de contraseña
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email es requerido" });
+  }
+
+  try {
+    // Verificar si el usuario existe
+    const user = await User.findOne({ where: { email } });
+    
+    if (!user) {
+      // Por seguridad, no revelamos si el email existe o no
+      return res.json({ message: "Si el email existe, se ha enviado un enlace de recuperación" });
+    }
+
+    // Por ahora solo simular el envío
+    console.log(`📧 Enlace de recuperación solicitado para: ${email}`);
+    
+    res.json({ message: "Si el email existe, se ha enviado un enlace de recuperación" });
+
+  } catch (error) {
+    console.error("❌ Error en forgot-password:", error);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+});
+
 module.exports = router;
