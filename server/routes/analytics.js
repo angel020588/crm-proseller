@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { Op, fn, col, literal } = require('sequelize');
-const verifyToken = require("../middlewares/verifyToken");
+const verifyToken = require("../../middlewares/verifyToken");
 const { User, Lead, Client, Quotation, Followup } = require("../models");
 
 // GET /api/analytics - Dashboard principal con métricas
