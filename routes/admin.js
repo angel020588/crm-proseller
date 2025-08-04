@@ -216,4 +216,137 @@ router.get('/stats', auth, checkRole(['admin']), async (req, res) => {
   }
 });
 
+// GET export data - Solo admins
+router.get('/export/:type', auth, checkRole(['admin']), async (req, res) => {
+  try {
+    const { type } = req.params;
+    let data = [];
+    let headers = [];
+
+    switch (type) {
+      case 'users':
+        data = await User.findAll({
+          include: [{
+            model: Role,
+            as: 'Role',
+            attributes: ['name', 'displayName']
+          }],
+          attributes: { exclude: ['password'] }
+        });
+        headers = ['ID', 'Nombre', 'Email', 'Rol', 'Estado', 'Creado'];
+        data = data.map(user => [
+          user.id,
+          user.name,
+          user.email,
+          user.Role?.name || 'user',
+          user.isActive ? 'Activo' : 'Inactivo',
+          user.createdAt
+        ]);
+        break;
+
+      case 'clients':
+        const { Client } = require('../models');
+        data = await Client.findAll();
+        headers = ['ID', 'Nombre', 'Email', 'Teléfono', 'Empresa', 'Creado'];
+        data = data.map(client => [
+          client.id,
+          client.name,
+          client.email,
+          client.phone || '',
+          client.company || '',
+          client.createdAt
+        ]);
+        break;
+
+      case 'leads':
+        const { Lead } = require('../models');
+        data = await Lead.findAll();
+        headers = ['ID', 'Nombre', 'Email', 'Teléfono', 'Estado', 'Fuente', 'Creado'];
+        data = data.map(lead => [
+          lead.id,
+          lead.name,
+          lead.email,
+          lead.phone || '',
+          lead.status,
+          lead.source || '',
+          lead.createdAt
+        ]);
+        break;
+
+      case 'quotations':
+        const { Quotation } = require('../models');
+        data = await Quotation.findAll();
+        headers = ['ID', 'Cliente', 'Total', 'Estado', 'Creado'];
+        data = data.map(quotation => [
+          quotation.id,
+          quotation.clientName || quotation.clientId,
+          quotation.total || 0,
+          quotation.status,
+          quotation.createdAt
+        ]);
+        break;
+
+      default:
+        return res.status(400).json({ message: 'Tipo de exportación no válido' });
+    }
+
+    // Crear CSV
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => row.map(field => `"${field}"`).join(','))
+    ].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${type}_export.csv"`);
+    res.send(csvContent);
+
+  } catch (error) {
+    console.error('Error exporting data:', error);
+    res.status(500).json({ message: 'Error al exportar datos', error: error.message });
+  }
+});
+
+// DELETE mass delete - Solo admins
+router.delete('/mass-delete/:type', auth, checkRole(['admin']), async (req, res) => {
+  try {
+    const { type } = req.params;
+    let deletedCount = 0;
+
+    switch (type) {
+      case 'clients':
+        const { Client } = require('../models');
+        deletedCount = await Client.destroy({ where: {} });
+        break;
+
+      case 'leads':
+        const { Lead } = require('../models');
+        deletedCount = await Lead.destroy({ where: {} });
+        break;
+
+      case 'quotations':
+        const { Quotation } = require('../models');
+        deletedCount = await Quotation.destroy({ where: {} });
+        break;
+
+      case 'followups':
+        const { Followup } = require('../models');
+        deletedCount = await Followup.destroy({ where: {} });
+        break;
+
+      default:
+        return res.status(400).json({ message: 'Tipo de eliminación no válido' });
+    }
+
+    res.json({ 
+      message: `Se eliminaron ${deletedCount} registros de ${type}`,
+      deletedCount,
+      type 
+    });
+
+  } catch (error) {
+    console.error('Error in mass delete:', error);
+    res.status(500).json({ message: 'Error en eliminación masiva', error: error.message });
+  }
+});
+
 module.exports = router;

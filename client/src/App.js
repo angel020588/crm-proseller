@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,6 +17,7 @@ import ApiKeys from './pages/ApiKeys';
 import Subscription from './pages/Subscription';
 import Automation from './pages/Automation';
 import Roles from './pages/Roles';
+import AdminPanel from './pages/AdminPanel'; // Asegúrate de que esta ruta sea correcta
 import './App.css';
 
 // Configurar axios globalmente
@@ -70,6 +70,7 @@ function App() {
           <Route path="/resumen-completo" element={<ResumenCompleto />} />
           <Route path="/automation" element={<Automation />} />
           <Route path="/roles" element={<Roles />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </div>
     </Router>

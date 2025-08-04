@@ -139,12 +139,22 @@ export default function Dashboard() {
             <option value="quarter">Este trimestre</option>
             <option value="year">Este año</option>
           </select>
-          <Link
-            to="/resumen"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors"
-          >
-            📋 Ver Resumen Completo
-          </Link>
+          <div className="flex space-x-4">
+            <Link
+              to="/resumen"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors"
+            >
+              📋 Ver Resumen Completo
+            </Link>
+            {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' && (
+              <Link
+                to="/admin"
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors"
+              >
+                🛠️ Panel Admin
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
