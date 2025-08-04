@@ -1,6 +1,15 @@
 
+require('dotenv').config();
 const { Pool } = require('pg');
 const { Sequelize } = require('sequelize');
+
+// Validar que DATABASE_URL esté configurada
+if (!process.env.DATABASE_URL) {
+  console.error('❌ ERROR: DATABASE_URL no está configurada en el archivo .env');
+  process.exit(1);
+}
+
+console.log('✅ DATABASE_URL encontrada:', process.env.DATABASE_URL ? 'Sí' : 'No');
 
 // Configuración de PostgreSQL usando la variable de entorno de Replit
 const pool = new Pool({
