@@ -1,9 +1,23 @@
+
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Followups from './pages/Followups';
+import Notifications from './pages/Notifications';
+import Account from './pages/Account';
+import Perfil from './pages/Perfil';
+import Resumen from './pages/Resumen';
+import ResumenCompleto from './pages/ResumenCompleto';
+import Leads from './pages/Leads';
+import Clients from './pages/Clients';
+import Quotations from './pages/Quotations';
+import ApiKeys from './pages/ApiKeys';
+import Subscription from './pages/Subscription';
+import Automation from './pages/Automation';
+import Roles from './pages/Roles';
 import './App.css';
 
 // Configurar axios globalmente
@@ -26,23 +40,7 @@ axios.interceptors.response.use(
   }
 );
 
-import Followups from './pages/Followups';
-import Notifications from './pages/Notifications';
-import Account from './pages/Account';
-import Perfil from './pages/Perfil';
-import Resumen from './pages/Resumen';
-import ResumenCompleto from './pages/ResumenCompleto';
-import Leads from './pages/Leads';
-import Clients from './pages/Clients';
-import Quotations from './pages/Quotations';
-import ApiKeys from './pages/ApiKeys';
-import Subscription from './pages/Subscription';
-import Automation from './pages/Automation';
-import Roles from './pages/Roles';
-
 function App() {
-  const isAuthenticated = localStorage.getItem('token');
-
   useEffect(() => {
     // Configurar axios con el token guardado al iniciar la app
     const token = localStorage.getItem('token');
