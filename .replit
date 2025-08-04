@@ -20,3 +20,7 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd client && npm install && npm run build && cd .. && npm install && npm start"
+
+[deployment]
+run = ["sh", "-c", "npm install && npm start"]
+build = ["sh", "-c", "cd client && npm install && npm run build"]
