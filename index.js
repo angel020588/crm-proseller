@@ -1,61 +1,76 @@
-const fs = require("fs");
-const path = require("path");
-const Sequelize = require("sequelize");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
 
-const db = {};
+// Importar base de datos y modelos
+const db = require('./models');
+const seedRoles = require('./seeders/seedRoles');
 
-if (!process.env.DATABASE_URL) {
-  console.error(
-    "❌ ERROR: DATABASE_URL no está configurada en el archivo .env",
-  );
-  process.exit(1);
+// Importar rutas
+const authRoutes = require('./routes/auth');
+const clientRoutes = require('./routes/clients');
+const leadRoutes = require('./routes/leads');
+const quotationRoutes = require('./routes/quotations');
+const followupRoutes = require('./routes/followups');
+const roleRoutes = require('./routes/roles');
+const userRoutes = require('./routes/users');
+const dashboardRoutes = require('./routes/dashboard');
+const notificationRoutes = require('./routes/notifications');
+const subscriptionRoutes = require('./routes/subscriptions');
+const apiKeyRoutes = require('./routes/apikeys');
+const webhookRoutes = require('./routes/webhooks');
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Servir archivos estáticos del frontend
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Rutas API
+app.use('/api/auth', authRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/leads', leadRoutes);
+app.use('/api/quotations', quotationRoutes);
+app.use('/api/followups', followupRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/apikeys', apiKeyRoutes);
+app.use('/api/webhooks', webhookRoutes);
+
+// Ruta catch-all para React Router
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+
+// Inicializar servidor
+const PORT = process.env.PORT || 5000;
+
+async function startServer() {
+  try {
+    // Sincronizar base de datos
+    await db.sequelize.sync();
+    console.log('✅ Base de datos conectada');
+
+    // Ejecutar seeders
+    await seedRoles(db);
+    
+    // Iniciar servidor
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error('❌ Error iniciando servidor:', error);
+    process.exit(1);
+  }
 }
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-  dialect: "postgres",
-  logging: false,
-  dialectOptions: {
-    ssl: {
-      require: true,
-      rejectUnauthorized: false,
-    },
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
-});
-
-const basename = path.basename(__filename);
-
-// Cargar todos los modelos del directorio
-fs.readdirSync(__dirname)
-  .filter(
-    (file) =>
-      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js",
-  )
-  .forEach((file) => {
-    const model = require(path.join(__dirname, file))(
-      sequelize,
-      Sequelize.DataTypes,
-    );
-    db[model.name] = model;
-  });
-
-// Asociar modelos si tienen relaciones
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
-
-// Debug para ver los modelos cargados
-console.log("Modelos cargados:", Object.keys(db));
-
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
-module.exports = db;
+startServer();
