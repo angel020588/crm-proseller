@@ -40,9 +40,12 @@ export default function Login() {
         navigate('/dashboard');
       }
     } catch (error) {
-      setError(err.response?.data?.message || "Error al iniciar sesión");
+      console.error('❌ Error en login:', error);
+      setError(error.response?.data?.message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
+    }
+  };
     }
   };
 
