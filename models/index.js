@@ -12,17 +12,17 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-// Usar DATABASE_URL como en config/database.js
+// Usar DATABASE_URL con la misma configuración que config/database.js
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
+  protocol: 'postgres',
   logging: false,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  pool: {
-    max: 10,
-    min: 0,
-    acquire: 30000,
-    idle: 10000
-  }
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // para Render
+    },
+  },
 });
 
 // Cargar todos los modelos del directorio
