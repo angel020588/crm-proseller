@@ -1,3 +1,4 @@
+
 const fs = require("fs");
 const path = require("path");
 const Sequelize = require("sequelize");
@@ -12,17 +13,30 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-// Usar DATABASE_URL con la misma configuración que config/database.js
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// Parsear manualmente la URL para evitar errores de Sequelize
+const databaseUrl = process.env.DATABASE_URL;
+const url = new URL(databaseUrl);
+
+const sequelize = new Sequelize({
+  database: url.pathname.slice(1), // Remover el '/' inicial
+  username: url.username,
+  password: url.password,
+  host: url.hostname,
+  port: url.port || 5432,
   dialect: 'postgres',
-  protocol: 'postgres',
   logging: false,
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // para Render
+      rejectUnauthorized: false,
     },
   },
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
 });
 
 // Cargar todos los modelos del directorio
