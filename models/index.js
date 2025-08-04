@@ -6,16 +6,24 @@ require("dotenv").config();
 
 const db = {};
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-    logging: false,
-  },
-);
+// Validar que DATABASE_URL esté configurada
+if (!process.env.DATABASE_URL) {
+  console.error('❌ ERROR: DATABASE_URL no está configurada en el archivo .env');
+  process.exit(1);
+}
+
+// Usar DATABASE_URL como en config/database.js
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  logging: false,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
+});
 
 // Cargar todos los modelos del directorio
 fs.readdirSync(__dirname)
