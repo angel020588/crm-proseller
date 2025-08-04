@@ -8,3 +8,15 @@ externalPort = 80
 
 [nix]
 channel = "stable-25_05"
+
+[workflows]
+runButton = "Deploy CRM"
+
+[[workflows.workflow]]
+name = "Deploy CRM"
+author = 43938259
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npm install && npm run build && cd .. && npm install && npm start"
