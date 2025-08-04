@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -99,6 +98,7 @@ sequelize.sync({ alter: true })
       console.log(`✅ Servidor CRM corriendo en http://0.0.0.0:${PORT}`);
       console.log(`🚀 Backend API disponible en puerto ${PORT}`);
       console.log(`📋 Rutas registradas activas`);
+      console.log(`🌐 Accesible públicamente en Replit`);
     });
   })
   .catch(err => {
