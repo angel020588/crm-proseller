@@ -10,8 +10,13 @@ module.exports = (sequelize, DataTypes) => {
     permissions: DataTypes.JSONB,
   });
 
-  // Puedes agregar asociaciones si lo necesitas:
-  // Role.associate = (db) => {};
+  Role.associate = (models) => {
+    // Un rol puede tener muchos usuarios
+    Role.hasMany(models.User, { 
+      foreignKey: 'roleId', 
+      as: 'Users' 
+    });
+  };
 
   return Role;
 };

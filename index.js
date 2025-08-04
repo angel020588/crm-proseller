@@ -59,6 +59,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/custom-fields', customFieldsRoutes);
 app.use('/api', privadaRoutes);
+app.use('/api/roles', require('./routes/roles'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Ruta catch-all para React Router
 app.get('*', (req, res) => {
