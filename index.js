@@ -32,6 +32,11 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, 'client/build')));
 
+// Ruta de prueba
+app.get("/api/test", (req, res) => {
+  res.json({ message: "✅ API funcionando correctamente", timestamp: new Date() });
+});
+
 // Rutas API
 app.use('/api/auth', authRoutes);
 app.use('/api/clients', clientRoutes);
@@ -65,9 +70,10 @@ async function startServer() {
     await seedRoles(db);
 
     // Iniciar servidor
-    app.listen(PORT, '0.0.0.0', () => {
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-      console.log(`📱 Accede a tu CRM en: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
+      console.log(`📱 Accede a tu CRM en: https://${process.env.REPL_SLUG || 'workspace'}.${process.env.REPL_OWNER || 'ecotisat'}.repl.co`);
+      console.log(`🧪 Prueba la API en: https://${process.env.REPL_SLUG || 'workspace'}.${process.env.REPL_OWNER || 'ecotisat'}.repl.co/api/test`);
     });
 
   } catch (error) {
