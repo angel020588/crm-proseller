@@ -1,0 +1,180 @@
+ Middleware verifyToken.js para proteger rutas:
+js
+Copiar
+Editar
+const jwt = require('jsonwebtoken');
+
+function verifyToken(req, res, next) {
+  const token = req.headers['authorization'];
+
+  if (!token) return res.status(401).json({ message: 'Token requerido' });
+
+  try {
+    const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET || 'clave-demo');
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+}
+
+module.exports = verifyToken;
+Guárdalo como:
+
+bash
+Copiar
+Editar
+/middlewares/verifyToken.js
+✅ 3. Ejemplo de ruta protegida:
+js
+Copiar
+Editar
+const express = require('express');
+const verifyToken = require('../middlewares/verifyToken');
+const router = express.Router();
+
+router.get('/privada', verifyToken, (req, res) => {
+  res.json({ message: `Bienvenido ${req.user.email}, accediste a una ruta protegida.` });
+});
+
+module.exports = router;
+Guarda esto como:
+
+bash
+Copiar
+Editar
+/routes/privada.js
+Y en index.js:
+
+js
+Copiar
+Editar
+const privadaRoutes = require('./routes/privada');
+app.use("/api/privada", privadaRoutes);
+✅ 4. Subir todo a GitHub
+bash
+Copiar
+Editar
+git add routes/auth.js middlewares/verifyToken.js routes/privada.js
+git commit -m "🛡️ Sistema de autenticación con JWT y rutas protegidas"
+git push origin main
+📲 Ya podrás hacer:
+POST /api/auth/login con:
+
+json
+Copiar
+Editar
+{ "email": "admin@crm.com", "password": "123456" }
+Luego usar el token para acceder a:
+
+pgsql
+Copiar
+Editar
+GET /api/privada
+Header: Authorization: Bearer <tu_token>
+¿Te gustaría que prepare también un authController.js si lo quieres separar por capas (rutas/controladores)?
+
+
+
+
+
+
+
+
+Dijiste:
+
+
+ChatGPT dijo:
+Perfecto Ángel, ya vi tu dashboard de Render y ambos servicios están activos:
+
+✅ CRM-Proseller (Backend desplegado con Node.js)
+
+✅ base de datos de CRM-Proseller (PostgreSQL disponible)
+
+Esto significa que ya tienes tu servidor Node + base de datos en producción funcionando.
+
+✅ Próximo paso clave: probar tu API en producción
+Ve a tu servicio CRM-Proseller.
+
+Copia la URL pública que aparece arriba (ej. https://crm-proseller.onrender.com).
+
+Abre Postman o Insomnia, o usa curl desde consola para probar el login:
+
+🔐 Ejemplo de login:
+http
+Copiar
+Editar
+POST https://TU-URL-EN-RENDER/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@crm.com",
+  "password": "123456"
+}
+Debe devolverte algo así:
+
+json
+Copiar
+Editar
+{
+  "message": "Login exitoso",
+  "token": "eyJhbGciOi..."
+}
+🚨 Si quieres probar con una ruta protegida:
+Usa el token recibido en el header:
+
+http
+Copiar
+Editar
+GET https://TU-URL-EN-RENDER/api/privada
+Authorization: Bearer TU_TOKEN
+¿Listo para que te prepare el authController.js profesional y también usersController.js para registrar nuevos usuarios si aún no tienes esa parte? O nos enfocamos ahora en probar el login real. Tú decides.
+
+
+
+
+
+
+
+
+Dijiste:
+ahora quiero verlo visual quiero ver pantalla principal 
+
+
+ChatGPT dijo:
+Perfecto, Ángel. Si ya hiciste el deploy del servidor en Render y lo que ahora quieres es ver la parte visual (la app React/cliente) con su pantalla principal, entonces vamos a hacer lo siguiente paso por paso.
+
+✅ PASOS PARA VER LA PANTALLA PRINCIPAL (CLIENTE - FRONTEND)
+1. ¿Ya tienes la carpeta client/ en tu proyecto?
+Asegúrate que tu estructura en GitHub es como esta:
+
+java
+Copiar
+Editar
+/workspace
+  ├── client/        ← Aquí está tu app React
+  ├── server/        ← Aquí está tu backend (Node, Express)
+  ├── package.json   ← En raíz, con script para correr ambos
+Si ya está así, continúa. Si sacaste todo a la raíz (sin carpeta client), dímelo para darte otra instrucción.
+
+2. 🚀 Subir el FRONTEND a Render
+Debes crear otro servicio en Render (como hiciste con el backend), pero ahora será un Static Site.
+
+📍 Pasos exactos:
+Ve a tu dashboard de Render.
+
+Clic en “+ Nuevo” → “Sitio Estático”.
+
+Conecta el mismo repo de GitHub (CRM-Proseller).
+
+En la configuración pon lo siguiente:
+
+Campo	Valor
+Nombre	client-proseller
+Ruta del directorio	client
+Build Command	npm run build
+Publish Directory	client/build
+Branch	main (u otra si es distinta)
+
+Presiona Create Static Site y espera que se construya.
+
