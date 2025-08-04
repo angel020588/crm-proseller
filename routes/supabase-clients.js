@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const supabase = require("../server/lib/supabaseClient");
+const supabase = require("../lib/supabaseClient");
 
 router.post('/', async (req, res) => {
   const { nombre, telefono, email, ciudad } = req.body;
