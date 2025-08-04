@@ -7,7 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "server": "nodemon index.js",
-    "build": "echo 'No build step needed for backend-only project'"
+    "build": "cd client && npm install && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
