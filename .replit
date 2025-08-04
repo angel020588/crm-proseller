@@ -110,6 +110,19 @@ args = "cd ../server && npm install"
 task = "shell.exec"
 args = "node index.js"
 
+[[workflows.workflow]]
+name = "🚀 Deploy Producción Limpio"
+author = 43938259
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"
+
 [deployment]
-run = ["sh", "-c", "cd server && node index.js"]
-build = ["sh", "-c", "cd client && npm install && npm run build"]
+run = ["sh", "-c", "npm start"]
+build = ["sh", "-c", "npm run build"]
