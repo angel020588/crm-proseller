@@ -17,7 +17,8 @@ import ApiKeys from './pages/ApiKeys';
 import Subscription from './pages/Subscription';
 import Automation from './pages/Automation';
 import Roles from './pages/Roles';
-import AdminPanel from './pages/AdminPanel'; // Asegúrate de que esta ruta sea correcta
+import AdminPanel from './pages/AdminPanel';
+import SuperAdminPanel from './pages/SuperAdminPanel'; // Importar SuperAdminPanel
 import './App.css';
 
 // Configurar axios globalmente
@@ -71,6 +72,7 @@ function App() {
           <Route path="/automation" element={<Automation />} />
           <Route path="/roles" element={<Roles />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/super-admin" element={<SuperAdminPanel />} /> {/* Ruta para SuperAdminPanel */}
         </Routes>
       </div>
     </Router>

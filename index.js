@@ -11,20 +11,17 @@ const seedRoles = require('./seeders/seedRoles');
 const authRoutes = require('./routes/auth');
 const clientRoutes = require('./routes/clients');
 const leadRoutes = require('./routes/leads');
-const quotationRoutes = require('./routes/quotations');
 const followupRoutes = require('./routes/followups');
-const roleRoutes = require('./routes/roles');
-const userRoutes = require('./routes/users');
+const quotationRoutes = require('./routes/quotations');
 const dashboardRoutes = require('./routes/dashboard');
-const notificationRoutes = require('./routes/notifications');
-const subscriptionRoutes = require('./routes/subscriptions');
-const apiKeyRoutes = require('./routes/apikeys');
 const webhookRoutes = require('./routes/webhooks');
-const privadaRoutes = require('./routes/privada');
-const resumenRoutes = require('./routes/resumen');
-const analyticsRoutes = require('./routes/analytics');
-const automationRoutes = require('./routes/automation');
-const customFieldsRoutes = require('./routes/custom-fields');
+const notificationRoutes = require('./routes/notifications');
+const apiKeyRoutes = require('./routes/apikeys');
+const userRoutes = require('./routes/users');
+const adminRoutes = require('./routes/admin');
+const roleRoutes = require('./routes/roles');
+const subscriptionRoutes = require('./routes/subscriptions');
+const superAdminRoutes = require('./routes/super-admin');
 
 const app = express();
 
@@ -61,6 +58,7 @@ app.use('/api/custom-fields', customFieldsRoutes);
 app.use('/api', privadaRoutes);
 app.use('/api/roles', require('./routes/roles'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/super-admin', superAdminRoutes);
 
 // Ruta catch-all para React Router
 app.get('*', (req, res) => {
