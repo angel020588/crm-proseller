@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -22,8 +21,17 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
+      setLoading(true);
+
+      // Verificar que tenemos token
       const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
+      if (!token) {
+        console.error('❌ No hay token disponible');
+        navigate('/login');
+        return;
+      }
+
+      console.log('🔑 Usando token:', token.substring(0, 20) + '...');
 
       const [
         statsRes,
@@ -32,11 +40,31 @@ export default function Dashboard() {
         leadsRes,
         followupsRes
       ] = await Promise.all([
-        axios.get(`/api/stats/dashboard?timeframe=${timeframe}`, { headers }),
-        axios.get('/api/clients?limit=5', { headers }),
-        axios.get('/api/quotations?limit=5', { headers }),
-        axios.get('/api/leads?limit=5', { headers }),
-        axios.get('/api/followups?limit=5', { headers })
+        axios.get(`/api/stats/dashboard?timeframe=${timeframe}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }),
+        axios.get('/api/clients?limit=5', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }),
+        axios.get('/api/quotations?limit=5', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }),
+        axios.get('/api/leads?limit=5', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }),
+        axios.get('/api/followups?limit=5', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        })
       ]);
 
       setData({
@@ -48,7 +76,14 @@ export default function Dashboard() {
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      setError('Error al cargar los datos del dashboard');
+      if (error.response?.status === 401) {
+        console.error('❌ Token inválido, redirigiendo al login');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      } else {
+        setError('Error al cargar los datos del dashboard');
+      }
     } finally {
       setLoading(false);
     }

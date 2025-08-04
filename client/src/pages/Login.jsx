@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
@@ -18,18 +17,29 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
-      const res = await axios.post("/api/auth/login", {
+      const response = await axios.post('/api/auth/login', {
         email,
         password
       });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      
-      navigate("/dashboard");
-    } catch (err) {
+      console.log('✅ Login exitoso:', response.data);
+
+      if (response.data.token) {
+        // Guardar token y usuario
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+
+        // Configurar axios para futuras peticiones
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
+        // Verificar que el token se guardó correctamente
+        console.log('🔑 Token guardado:', response.data.token);
+
+        navigate('/dashboard');
+      }
+    } catch (error) {
       setError(err.response?.data?.message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
@@ -41,12 +51,12 @@ export default function Login() {
     setLoading(true);
     setError("");
     setResetMessage("");
-    
+
     try {
       await axios.post("/api/auth/forgot-password", {
         email: resetEmail
       });
-      
+
       setResetMessage("Se ha enviado un enlace de recuperación a tu correo electrónico");
       setShowForgotPassword(false);
       setResetEmail("");
