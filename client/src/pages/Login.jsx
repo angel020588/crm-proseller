@@ -19,28 +19,17 @@ export default function Login() {
     setError("");
 
     try {
-      const response = await axios.post('/api/auth/login', {
-        email,
-        password
-      });
-
-      console.log('✅ Login exitoso:', response.data);
+      const response = await axios.post("/api/auth/login", { email, password });
 
       if (response.data.token) {
-        // Guardar token y usuario
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
 
-        // Configurar axios para futuras peticiones
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`;
 
-        // Verificar que el token se guardó correctamente
-        console.log('🔑 Token guardado:', response.data.token);
-
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     } catch (error) {
-      console.error('❌ Error en login:', error);
       setError(error.response?.data?.message || "Error al iniciar sesión");
     } finally {
       setLoading(false);
@@ -54,10 +43,7 @@ export default function Login() {
     setResetMessage("");
 
     try {
-      await axios.post("/api/auth/forgot-password", {
-        email: resetEmail
-      });
-
+      await axios.post("/api/auth/forgot-password", { email: resetEmail });
       setResetMessage("Se ha enviado un enlace de recuperación a tu correo electrónico");
       setShowForgotPassword(false);
       setResetEmail("");
@@ -69,11 +55,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Iniciar Sesión
-        </h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Iniciar Sesión</h2>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -82,10 +66,9 @@ export default function Login() {
         )}
 
         <form onSubmit={handleLogin}>
+          {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Correo electrónico
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
             <input
               type="email"
               placeholder="tu@email.com"
@@ -96,10 +79,9 @@ export default function Login() {
             />
           </div>
 
+          {/* Contraseña */}
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Contraseña
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -128,6 +110,7 @@ export default function Login() {
             </div>
           </div>
 
+          {/* Botón de login */}
           <button
             type="submit"
             disabled={loading}
@@ -137,16 +120,18 @@ export default function Login() {
           </button>
         </form>
 
+        {/* Olvidé mi contraseña */}
         <div className="text-center mt-4">
           <button
             type="button"
             onClick={() => setShowForgotPassword(!showForgotPassword)}
-            className="text-sm text-blue-600 hover:underline mb-2"
+            className="text-sm text-blue-600 hover:underline"
           >
             ¿Olvidaste tu contraseña?
           </button>
         </div>
 
+        {/* Formulario recuperación */}
         {showForgotPassword && (
           <div className="mt-4 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-lg font-semibold mb-3">Recuperar Contraseña</h3>
@@ -183,13 +168,15 @@ export default function Login() {
           </div>
         )}
 
+        {/* Mensaje de recuperación */}
         {resetMessage && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mt-4">
             {resetMessage}
           </div>
         )}
 
-        <p className="text-sm text-center mt-4 text-gray-600">
+        {/* Registro */}
+        <p className="text-sm text-center mt-6 text-gray-600">
           ¿No tienes cuenta?{" "}
           <Link to="/register" className="text-blue-600 hover:underline">
             Regístrate aquí
