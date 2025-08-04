@@ -7,7 +7,13 @@ const router = express.Router();
 
 // Ruta de registro
 router.post("/register", async (req, res) => {
+  console.log("📝 Intentando registrar usuario:", req.body);
   const { name, email, password, roleName = "usuario" } = req.body;
+
+  // Validar campos requeridos
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "Faltan campos requeridos" });
+  }
 
   try {
     // Verificar si el usuario ya existe

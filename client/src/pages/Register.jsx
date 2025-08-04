@@ -41,6 +41,12 @@ export default function Register() {
     }
 
     try {
+      console.log("🔄 Enviando datos de registro:", {
+        name: formData.name,
+        email: formData.email,
+        roleName: formData.roleName
+      });
+
       const res = await axios.post("/api/auth/register", {
         name: formData.name,
         email: formData.email,
@@ -48,12 +54,23 @@ export default function Register() {
         roleName: formData.roleName
       });
 
+      console.log("✅ Registro exitoso:", res.data);
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Error al crear la cuenta");
+      console.error("❌ Error en registro:", err);
+      console.error("❌ Respuesta del servidor:", err.response?.data);
+      
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status === 404) {
+        setError("Servicio de registro no disponible");
+      } else {
+        setError("Error al crear la cuenta. Verifica tu conexión.");
+      }
     } finally {
       setLoading(false);
     }
