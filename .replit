@@ -1,6 +1,5 @@
 entrypoint = "index.js"
 run = "npm install && npm run dev"
-modules = ["nodejs-20"]
 
 [[ports]]
 localPort = 3000
