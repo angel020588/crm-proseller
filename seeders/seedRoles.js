@@ -1,7 +1,6 @@
-const { Role } = require("../models");
-
-async function seedRoles() {
+async function seedRoles(db) {
   const roles = ["admin", "usuario", "editor", "supervisor"];
+  const Role = db.Role;
 
   for (const roleName of roles) {
     const [role, created] = await Role.findOrCreate({
