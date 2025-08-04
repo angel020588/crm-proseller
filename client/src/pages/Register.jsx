@@ -4,32 +4,56 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [roleName, setRoleName] = useState("vendedor");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    roleName: "usuario"
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
+    // Validaciones
+    if (formData.password !== formData.confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", {
-        email,
-        password,
-        name,
-        roleName
+      const res = await axios.post("/api/auth/register", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        roleName: formData.roleName
       });
 
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Error al registrar");
+      setError(err.response?.data?.message || "Error al crear la cuenta");
     } finally {
       setLoading(false);
     }
@@ -55,9 +79,10 @@ export default function Register() {
             </label>
             <input
               type="text"
-              placeholder="Tu nombre"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="name"
+              placeholder="Tu nombre completo"
+              value={formData.name}
+              onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -69,9 +94,10 @@ export default function Register() {
             </label>
             <input
               type="email"
+              name="email"
               placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -81,47 +107,47 @@ export default function Register() {
             <label className="block text-gray-700 text-sm font-bold mb-2">
               Contraseña
             </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Mínimo 6 caracteres"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength="6"
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
-              </button>
-            </div>
+            <input
+              type="password"
+              name="password"
+              placeholder="Mínimo 6 caracteres"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength="6"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Confirmar contraseña
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Repite tu contraseña"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2">
-              Rol
+              Tipo de cuenta
             </label>
             <select
-              value={roleName}
-              onChange={(e) => setRoleName(e.target.value)}
+              name="roleName"
+              value={formData.roleName}
+              onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="vendedor">Vendedor</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Administrador</option>
+              <option value="usuario">👤 Usuario</option>
+              <option value="editor">✏️ Editor</option>
+              <option value="supervisor">👨‍💼 Supervisor</option>
+              <option value="admin">👑 Administrador</option>
             </select>
           </div>
 
@@ -130,14 +156,14 @@ export default function Register() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {loading ? "Registrando..." : "Crear Cuenta"}
+            {loading ? "Creando cuenta..." : "Crear Cuenta"}
           </button>
         </form>
 
         <p className="text-sm text-center mt-4 text-gray-600">
           ¿Ya tienes cuenta?{" "}
           <Link to="/login" className="text-blue-600 hover:underline">
-            Inicia sesión
+            Inicia sesión aquí
           </Link>
         </p>
       </div>
