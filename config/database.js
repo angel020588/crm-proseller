@@ -9,8 +9,13 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL no está configurada');
 }
 
+// Limpiar la URL si viene con el prefijo DATABASE_URL=
+const cleanUrl = databaseUrl.startsWith('DATABASE_URL=') 
+  ? databaseUrl.replace('DATABASE_URL=', '') 
+  : databaseUrl;
+
 // Extraer componentes de la URL manualmente
-const url = new URL(databaseUrl);
+const url = new URL(cleanUrl);
 
 const sequelize = new Sequelize({
   database: url.pathname.slice(1), // Remover el '/' inicial
