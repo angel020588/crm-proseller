@@ -20,6 +20,7 @@ const notificationRoutes = require('./routes/notifications');
 const subscriptionRoutes = require('./routes/subscriptions');
 const apiKeyRoutes = require('./routes/apikeys');
 const webhookRoutes = require('./routes/webhooks');
+const privadaRoutes = require('./routes/privada');
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/apikeys', apiKeyRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api', privadaRoutes);
 
 // Ruta catch-all para React Router
 app.get('*', (req, res) => {
