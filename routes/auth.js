@@ -1,22 +1,12 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
-const crypto = require("crypto");
+const axios = require("axios");
 const { User, Role } = require("../models");
 
 const router = express.Router();
 
-// Configurar nodemailer
-const transporter = nodemailer.createTransporter({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER || 'tu-email@gmail.com',
-    pass: process.env.EMAIL_PASS || 'tu-app-password'
-  }
-});
+// Configuración removida - sin verificación de email
 
 // Validar email real
 const isValidEmail = (email) => {
@@ -51,10 +41,67 @@ const evaluatePasswordStrength = (password) => {
   return { score, strength, feedback };
 };
 
-// Ruta de registro
+// Sistema de límites de intentos (en memoria - para producción usar Redis)
+const loginAttempts = new Map();
+const MAX_ATTEMPTS = 5;
+const BLOCK_TIME = 15 * 60 * 1000; // 15 minutos
+
+// Función para verificar intentos
+const checkAttempts = (ip) => {
+  const attempts = loginAttempts.get(ip);
+  if (!attempts) return { allowed: true, remaining: MAX_ATTEMPTS };
+  
+  if (attempts.count >= MAX_ATTEMPTS) {
+    const timeLeft = attempts.blockedUntil - Date.now();
+    if (timeLeft > 0) {
+      return { 
+        allowed: false, 
+        remaining: 0, 
+        blockedUntil: new Date(attempts.blockedUntil),
+        timeLeft: Math.ceil(timeLeft / 60000) // minutos
+      };
+    } else {
+      // Reset después del bloqueo
+      loginAttempts.delete(ip);
+      return { allowed: true, remaining: MAX_ATTEMPTS };
+    }
+  }
+  
+  return { allowed: true, remaining: MAX_ATTEMPTS - attempts.count };
+};
+
+// Función para registrar intento fallido
+const recordFailedAttempt = (ip) => {
+  const attempts = loginAttempts.get(ip) || { count: 0 };
+  attempts.count++;
+  
+  if (attempts.count >= MAX_ATTEMPTS) {
+    attempts.blockedUntil = Date.now() + BLOCK_TIME;
+  }
+  
+  loginAttempts.set(ip, attempts);
+};
+
+// Ruta de registro simplificada
 router.post("/register", async (req, res) => {
   console.log("📝 Intentando registrar usuario:", req.body);
-  const { name, email, password, roleName = "usuario" } = req.body;
+  const { name, email, password, roleName = "usuario", recaptchaToken } = req.body;
+
+  // Verificar ReCaptcha (opcional - implementar si es necesario)
+  if (process.env.RECAPTCHA_SECRET && recaptchaToken) {
+    try {
+      const recaptchaResponse = await axios.post('https://www.google.com/recaptcha/api/siteverify', {
+        secret: process.env.RECAPTCHA_SECRET,
+        response: recaptchaToken
+      });
+      
+      if (!recaptchaResponse.data.success) {
+        return res.status(400).json({ message: "Verificación de ReCaptcha fallida" });
+      }
+    } catch (error) {
+      console.error("Error verificando ReCaptcha:", error);
+    }
+  }
 
   // Validar campos requeridos
   if (!name || !email || !password) {
@@ -72,7 +119,8 @@ router.post("/register", async (req, res) => {
   const passwordEval = evaluatePasswordStrength(password);
   if (passwordEval.score < 3) {
     return res.status(400).json({ 
-      message: `Contraseña ${passwordEval.strength}. Mejoras: ${passwordEval.feedback.join(', ')}` 
+      message: `Contraseña ${passwordEval.strength}. Mejoras: ${passwordEval.feedback.join(', ')}`,
+      passwordStrength: passwordEval
     });
   }
 
@@ -89,62 +137,36 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Rol no válido" });
     }
 
-    // Generar token de verificación
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-
-    // Crear el usuario (inactivo hasta verificar email)
+    // Crear el usuario activo directamente
     const user = await User.create({
       name,
       email,
       password,
       roleId: role.id,
-      isActive: false,
-      emailVerified: false,
-      verificationToken
+      isActive: true,
+      emailVerified: true // Simplificado - sin verificación
     });
 
-    // Enviar email de verificación
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
+    // Generar token de sesión inmediatamente
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET || "clave-demo",
+      { expiresIn: "24h" }
+    );
+
+    console.log(`✅ Usuario registrado exitosamente: ${email}`);
     
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER || 'noreply@crm.com',
-        to: email,
-        subject: '✅ Verifica tu cuenta - CRM ProSeller',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #4F46E5;">¡Bienvenido a CRM ProSeller!</h2>
-            <p>Hola <strong>${name}</strong>,</p>
-            <p>Tu cuenta ha sido creada exitosamente. Para activarla, haz clic en el siguiente enlace:</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${verificationUrl}" 
-                 style="background-color: #4F46E5; color: white; padding: 12px 30px; 
-                        text-decoration: none; border-radius: 5px; font-weight: bold;">
-                Verificar mi cuenta
-              </a>
-            </div>
-            <p>Este enlace expira en 24 horas.</p>
-            <p>Si no solicitaste esta cuenta, puedes ignorar este email.</p>
-            <hr style="margin: 30px 0;">
-            <p style="color: #666; font-size: 12px;">CRM ProSeller - Sistema de gestión profesional</p>
-          </div>
-        `
-      });
-
-      console.log(`📧 Email de verificación enviado a: ${email}`);
-      
-      res.status(201).json({ 
-        message: "Usuario registrado. Revisa tu email para verificar tu cuenta.",
-        emailSent: true,
-        passwordStrength: passwordEval.strength
-      });
-
-    } catch (emailError) {
-      console.error("❌ Error enviando email:", emailError);
-      // Si falla el email, eliminar usuario creado
-      await user.destroy();
-      res.status(500).json({ message: "Error enviando email de verificación" });
-    }
+    res.status(201).json({ 
+      message: "Usuario registrado exitosamente",
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        roleId: user.roleId
+      },
+      passwordStrength: passwordEval.strength
+    });
 
   } catch (err) {
     console.error("❌ Error en /register:", err);
@@ -153,17 +175,46 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, recaptchaToken } = req.body;
+  const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+
+  // Verificar límites de intentos
+  const attemptCheck = checkAttempts(clientIP);
+  if (!attemptCheck.allowed) {
+    return res.status(429).json({ 
+      message: `Demasiados intentos fallidos. Bloqueado por ${attemptCheck.timeLeft} minutos.`,
+      blockedUntil: attemptCheck.blockedUntil,
+      code: 'TOO_MANY_ATTEMPTS'
+    });
+  }
+
+  // Verificar ReCaptcha si hay muchos intentos
+  if (attemptCheck.remaining <= 2 && process.env.RECAPTCHA_SECRET && recaptchaToken) {
+    try {
+      const recaptchaResponse = await axios.post('https://www.google.com/recaptcha/api/siteverify', {
+        secret: process.env.RECAPTCHA_SECRET,
+        response: recaptchaToken
+      });
+      
+      if (!recaptchaResponse.data.success) {
+        return res.status(400).json({ 
+          message: "Verificación de ReCaptcha requerida",
+          requiresRecaptcha: true
+        });
+      }
+    } catch (error) {
+      console.error("Error verificando ReCaptcha:", error);
+    }
+  }
 
   try {
     const user = await User.findOne({ where: { email } });
 
-    if (!user)
-      return res.status(404).json({ message: "Usuario no encontrado" });
-
-    if (!user.emailVerified) {
-      return res.status(401).json({ 
-        message: "Debes verificar tu email antes de iniciar sesión. Revisa tu bandeja de entrada." 
+    if (!user) {
+      recordFailedAttempt(clientIP);
+      return res.status(404).json({ 
+        message: "Credenciales incorrectas",
+        remaining: attemptCheck.remaining - 1
       });
     }
 
@@ -172,15 +223,22 @@ router.post("/login", async (req, res) => {
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch)
-      return res.status(401).json({ message: "Contraseña incorrecta" });
+    if (!passwordMatch) {
+      recordFailedAttempt(clientIP);
+      return res.status(401).json({ 
+        message: "Credenciales incorrectas",
+        remaining: attemptCheck.remaining - 1,
+        requiresRecaptcha: attemptCheck.remaining <= 2
+      });
+    }
+
+    // Login exitoso - limpiar intentos
+    loginAttempts.delete(clientIP);
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET || "clave-demo",
-      {
-        expiresIn: "2h",
-      },
+      { expiresIn: "24h" }
     );
 
     res.json({ 
@@ -190,8 +248,7 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         roleId: user.roleId,
-        isActive: user.isActive,
-        emailVerified: user.emailVerified
+        isActive: user.isActive
       }
     });
   } catch (err) {
@@ -264,103 +321,7 @@ router.get("/me", async (req, res) => {
   }
 });
 
-// Ruta para verificar email
-router.get("/verify-email/:token", async (req, res) => {
-  try {
-    const { token } = req.params;
-    
-    const user = await User.findOne({ 
-      where: { 
-        verificationToken: token,
-        emailVerified: false 
-      } 
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: 'Token de verificación inválido o expirado' });
-    }
-
-    // Activar usuario
-    await user.update({
-      isActive: true,
-      emailVerified: true,
-      verificationToken: null
-    });
-
-    // Generar token de sesión
-    const sessionToken = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET || "clave-demo",
-      { expiresIn: "2h" }
-    );
-
-    res.json({ 
-      message: "Email verificado exitosamente",
-      token: sessionToken,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        roleId: user.roleId
-      }
-    });
-
-  } catch (error) {
-    console.error("❌ Error en verify-email:", error);
-    res.status(500).json({ message: 'Error del servidor' });
-  }
-});
-
-// Ruta para reenviar verificación
-router.post("/resend-verification", async (req, res) => {
-  try {
-    const { email } = req.body;
-    
-    const user = await User.findOne({ 
-      where: { 
-        email, 
-        emailVerified: false 
-      } 
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado o ya verificado' });
-    }
-
-    // Generar nuevo token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    await user.update({ verificationToken });
-
-    // Reenviar email
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}`;
-    
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER || 'noreply@crm.com',
-      to: email,
-      subject: '🔄 Reenvío verificación - CRM ProSeller',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #4F46E5;">Reenvío de verificación</h2>
-          <p>Hola <strong>${user.name}</strong>,</p>
-          <p>Aquí tienes un nuevo enlace de verificación:</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}" 
-               style="background-color: #4F46E5; color: white; padding: 12px 30px; 
-                      text-decoration: none; border-radius: 5px; font-weight: bold;">
-              Verificar mi cuenta
-            </a>
-          </div>
-        </div>
-      `
-    });
-
-    res.json({ message: "Email de verificación reenviado" });
-
-  } catch (error) {
-    console.error("❌ Error en resend-verification:", error);
-    res.status(500).json({ message: 'Error del servidor' });
-  }
-});
+// Rutas de verificación removidas - sistema simplificado
 
 // Ruta para cambiar contraseña
 router.put("/change-password", async (req, res) => {
