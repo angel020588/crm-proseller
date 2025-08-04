@@ -1,38 +1,46 @@
-name: Feature request
-description: Suggest an idea for this project
-title: Please replace with a clear and descriptive title
+name: "🚀 Feature Request"
+description: Sugiere una nueva funcionalidad o mejora para este proyecto
+title: "[FEATURE] Título claro y descriptivo"
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
-      value: Thanks for suggesting a new feature!
+      value: |
+        🙌 ¡Gracias por sugerir una nueva funcionalidad para este proyecto!
+        Por favor, proporciona información clara para que podamos evaluarla y priorizarla.
+
   - type: checkboxes
     attributes:
-      label: Guidelines
+      label: Verificación previa
       options:
-        - label:
-            Please search other issues to make sure this feature has not already
-            been requested.
+        - label: He buscado entre los issues existentes y no encontré esta solicitud.
           required: true
+
   - type: textarea
     attributes:
-      label: Which problem is this feature request solving?
-      placeholder: I'm always frustrated when [...]
+      label: ¿Qué problema resuelve esta funcionalidad?
+      placeholder: Me frustra cuando [...]
     validations:
       required: true
+
   - type: textarea
     attributes:
-      label: Describe the solution you'd like
-      placeholder: This could be fixed by [...]
+      label: Describe la solución que te gustaría
+      placeholder: Esto podría solucionarse si [...]
     validations:
       required: true
+
+  - type: textarea
+    attributes:
+      label: Alternativas que has considerado (opcional)
+      placeholder: También he pensado en [...]
+    validations:
+      required: false
+
   - type: checkboxes
     attributes:
-      label: Pull request (optional)
-      description:
-        Pull requests are welcome! If you would like to help us fix this bug,
-        please check our [contributions
-        guidelines](../blob/main/CONTRIBUTING.md).
+      label: ¿Puedes colaborar con esta mejora?
+      description: Si deseas ayudar creando un Pull Request, márcalo aquí.
       options:
-        - label: I can submit a pull request.
+        - label: Puedo enviar un Pull Request para esta mejora.
           required: false

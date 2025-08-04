@@ -29,9 +29,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      role: {
-        type: DataTypes.ENUM("admin", "user", "manager"),
-        defaultValue: "user",
+      // ✅ Reemplazamos ENUM por foreign key real a tabla Role
+      roleId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "roles",
+          key: "id",
+        },
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -63,6 +68,9 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.associate = (models) => {
+    // ✅ RELACIÓN User → Role
+    User.belongsTo(models.Role, { foreignKey: "roleId", as: "Role" });
+
     User.hasMany(models.Client, { foreignKey: "assignedTo" });
     User.hasMany(models.Lead, { foreignKey: "userId" });
     User.hasMany(models.Followup, { foreignKey: "assignedTo" });

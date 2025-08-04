@@ -1,223 +1,97 @@
+const { Role } = require("../models");
 
-const { Role, User } = require('../models');
-
-// Obtener todos los roles
-exports.getAllRoles = async (req, res) => {
-  try {
-    const roles = await Role.findAll({
-      order: [['createdAt', 'ASC']]
-    });
-    res.json(roles);
-  } catch (error) {
-    console.error('❌ Error obteniendo roles:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};
-
-// Alias para compatibilidad
-exports.getRoles = async (req, res) => {
-  try {
-    const roles = await Role.findAll({
-      order: [['createdAt', 'ASC']]
-    });
-    res.json(roles);
-  } catch (error) {
-    console.error('❌ Error obteniendo roles:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};
-
-// Crear nuevo rol
-exports.createRole = async (req, res) => {
-  try {
-    const { name, displayName, description, permissions } = req.body;
-    
-    if (!name || !displayName) {
-      return res.status(400).json({ message: 'Nombre y nombre de visualización son requeridos' });
-    }
-
-    // Verificar si el rol ya existe
-    const existingRole = await Role.findOne({ where: { name } });
-    if (existingRole) {
-      return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
-    }
-
-    const newRole = await Role.create({
-      name,
-      displayName,
-      description: description || '',
-      permissions: permissions || {}
-    });
-
-    res.status(201).json({
-      message: 'Rol creado exitosamente',
-      role: newRole
-    });
-  } catch (error) {
-    console.error('❌ Error creando rol:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};
-
-// Alias para compatibilidad
+// Crear un nuevo rol
 exports.crearRol = async (req, res) => {
   try {
     const { name, displayName, description, permissions } = req.body;
-    
-    if (!name || !displayName) {
-      return res.status(400).json({ message: 'Nombre y nombre de visualización son requeridos' });
+
+    if (!name) {
+      return res
+        .status(400)
+        .json({ message: "El nombre del rol es obligatorio" });
     }
 
-    // Verificar si el rol ya existe
-    const existingRole = await Role.findOne({ where: { name } });
-    if (existingRole) {
-      return res.status(400).json({ message: 'Ya existe un rol con ese nombre' });
+    const [role, created] = await Role.findOrCreate({
+      where: { name },
+      defaults: { displayName, description, permissions },
+    });
+
+    if (!created) {
+      return res.status(409).json({ message: "El rol ya existe" });
     }
 
-    const newRole = await Role.create({
-      name,
-      displayName,
-      description: description || '',
-      permissions: permissions || {}
-    });
-
-    res.status(201).json({
-      message: 'Rol creado exitosamente',
-      role: newRole
-    });
+    res.status(201).json({ message: "Rol creado correctamente", role });
   } catch (error) {
-    console.error('❌ Error creando rol:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    console.error("Error al crear rol:", error);
+    res
+      .status(500)
+      .json({ message: "Error del servidor", error: error.message });
   }
 };
 
-// Actualizar rol
-exports.updateRole = async (req, res) => {
+// Obtener todos los roles
+exports.obtenerRoles = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { displayName, description, permissions } = req.body;
-
-    const role = await Role.findByPk(id);
-    if (!role) {
-      return res.status(404).json({ message: 'Rol no encontrado' });
-    }
-
-    await role.update({
-      displayName: displayName || role.displayName,
-      description: description || role.description,
-      permissions: permissions || role.permissions
-    });
-
-    res.json({
-      message: 'Rol actualizado exitosamente',
-      role
-    });
+    const roles = await Role.findAll();
+    res.json({ roles });
   } catch (error) {
-    console.error('❌ Error actualizando rol:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    res
+      .status(500)
+      .json({ message: "Error al obtener roles", error: error.message });
   }
 };
 
-// Alias para compatibilidad
+// Obtener un rol por ID
+exports.obtenerRolPorId = async (req, res) => {
+  try {
+    const role = await Role.findByPk(req.params.id);
+    if (!role) {
+      return res.status(404).json({ message: "Rol no encontrado" });
+    }
+    res.json({ role });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error al obtener rol", error: error.message });
+  }
+};
+
+// Actualizar un rol por ID
 exports.actualizarRol = async (req, res) => {
   try {
-    const { id } = req.params;
     const { displayName, description, permissions } = req.body;
 
-    const role = await Role.findByPk(id);
-    if (!role) {
-      return res.status(404).json({ message: 'Rol no encontrado' });
+    const [updated] = await Role.update(
+      { displayName, description, permissions },
+      { where: { id: req.params.id } },
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Rol no encontrado" });
     }
 
-    await role.update({
-      displayName: displayName || role.displayName,
-      description: description || role.description,
-      permissions: permissions || role.permissions
-    });
-
-    res.json({
-      message: 'Rol actualizado exitosamente',
-      role
-    });
+    const rolActualizado = await Role.findByPk(req.params.id);
+    res.json({ message: "Rol actualizado correctamente", rol: rolActualizado });
   } catch (error) {
-    console.error('❌ Error actualizando rol:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    res
+      .status(500)
+      .json({ message: "Error al actualizar rol", error: error.message });
   }
 };
 
-// Eliminar rol
-exports.deleteRole = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const role = await Role.findByPk(id);
-    if (!role) {
-      return res.status(404).json({ message: 'Rol no encontrado' });
-    }
-
-    // Verificar si hay usuarios con este rol
-    const usersWithRole = await User.count({ where: { role: role.name } });
-    if (usersWithRole > 0) {
-      return res.status(400).json({ 
-        message: 'No se puede eliminar el rol porque hay usuarios asignados a él' 
-      });
-    }
-
-    await role.destroy();
-    res.json({ message: 'Rol eliminado exitosamente' });
-  } catch (error) {
-    console.error('❌ Error eliminando rol:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};
-
-// Alias para compatibilidad
+// Eliminar un rol por ID
 exports.eliminarRol = async (req, res) => {
   try {
-    const { id } = req.params;
+    const deleted = await Role.destroy({ where: { id: req.params.id } });
 
-    const role = await Role.findByPk(id);
-    if (!role) {
-      return res.status(404).json({ message: 'Rol no encontrado' });
+    if (!deleted) {
+      return res.status(404).json({ message: "Rol no encontrado" });
     }
 
-    // Verificar si hay usuarios con este rol
-    const usersWithRole = await User.count({ where: { role: role.name } });
-    if (usersWithRole > 0) {
-      return res.status(400).json({ 
-        message: 'No se puede eliminar el rol porque hay usuarios asignados a él' 
-      });
-    }
-
-    await role.destroy();
-    res.json({ message: 'Rol eliminado exitosamente' });
+    res.json({ message: "Rol eliminado correctamente" });
   } catch (error) {
-    console.error('❌ Error eliminando rol:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
-  }
-};
-
-// Obtener permisos de un rol específico
-exports.getPermisos = async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    const role = await Role.findByPk(id);
-    if (!role) {
-      return res.status(404).json({ message: 'Rol no encontrado' });
-    }
-
-    res.json({
-      role: {
-        id: role.id,
-        name: role.name,
-        displayName: role.displayName,
-        description: role.description
-      },
-      permissions: role.permissions || {}
-    });
-  } catch (error) {
-    console.error('❌ Error obteniendo permisos:', error);
-    res.status(500).json({ message: 'Error interno del servidor' });
+    res
+      .status(500)
+      .json({ message: "Error al eliminar rol", error: error.message });
   }
 };

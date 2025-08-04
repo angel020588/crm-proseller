@@ -9,45 +9,46 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
       },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
       },
       displayName: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: true,
       },
       description: {
         type: DataTypes.TEXT,
-        allowNull: true
+        allowNull: true,
       },
       permissions: {
         type: DataTypes.JSON,
         allowNull: true,
-        defaultValue: {}
-      }
+        defaultValue: {},
+      },
     },
     {
       sequelize,
       modelName: "Role",
       tableName: "roles",
-      timestamps: true
-    }
+      timestamps: true,
+    },
   );
 
+  // ✅ Asociación con modelo User
   Role.associate = (models) => {
     Role.hasMany(models.User, { foreignKey: "roleId" });
   };
 
-  // Roles por defecto
+  // ✅ Roles por defecto al inicializar el modelo
   const defaultRoles = [
     {
-      name: 'owner',
-      displayName: 'Propietario',
-      description: 'Acceso total al sistema',
+      name: "owner",
+      displayName: "Propietario",
+      description: "Acceso total al sistema",
       permissions: {
         dashboard: { read: true, write: true, delete: true },
         leads: { read: true, write: true, delete: true },
@@ -56,13 +57,13 @@ module.exports = (sequelize, DataTypes) => {
         users: { read: true, write: true, delete: true },
         settings: { read: true, write: true, delete: true },
         apikeys: { read: true, write: true, delete: true },
-        admin: { read: true, write: true, delete: true }
-      }
+        admin: { read: true, write: true, delete: true },
+      },
     },
     {
-      name: 'admin',
-      displayName: 'Administrador',
-      description: 'Gestión completa excepto configuración de usuarios',
+      name: "admin",
+      displayName: "Administrador",
+      description: "Gestión completa excepto configuración de usuarios",
       permissions: {
         dashboard: { read: true, write: true, delete: false },
         leads: { read: true, write: true, delete: true },
@@ -71,13 +72,13 @@ module.exports = (sequelize, DataTypes) => {
         users: { read: true, write: false, delete: false },
         settings: { read: true, write: true, delete: false },
         apikeys: { read: true, write: true, delete: false },
-        admin: { read: true, write: false, delete: false }
-      }
+        admin: { read: true, write: false, delete: false },
+      },
     },
     {
-      name: 'manager',
-      displayName: 'Gerente',
-      description: 'Supervisión de ventas y equipos',
+      name: "manager",
+      displayName: "Gerente",
+      description: "Supervisión de ventas y equipos",
       permissions: {
         dashboard: { read: true, write: true, delete: false },
         leads: { read: true, write: true, delete: false },
@@ -86,13 +87,13 @@ module.exports = (sequelize, DataTypes) => {
         users: { read: true, write: false, delete: false },
         settings: { read: true, write: false, delete: false },
         apikeys: { read: false, write: false, delete: false },
-        admin: { read: false, write: false, delete: false }
-      }
+        admin: { read: false, write: false, delete: false },
+      },
     },
     {
-      name: 'vendedor',
-      displayName: 'Vendedor',
-      description: 'Gestión de prospectos y clientes asignados',
+      name: "vendedor",
+      displayName: "Vendedor",
+      description: "Gestión de prospectos y clientes asignados",
       permissions: {
         dashboard: { read: true, write: false, delete: false },
         leads: { read: true, write: true, delete: false },
@@ -101,13 +102,13 @@ module.exports = (sequelize, DataTypes) => {
         users: { read: false, write: false, delete: false },
         settings: { read: false, write: false, delete: false },
         apikeys: { read: false, write: false, delete: false },
-        admin: { read: false, write: false, delete: false }
-      }
+        admin: { read: false, write: false, delete: false },
+      },
     },
     {
-      name: 'viewer',
-      displayName: 'Visualizador',
-      description: 'Solo lectura de dashboards y reportes',
+      name: "viewer",
+      displayName: "Visualizador",
+      description: "Solo lectura de dashboards y reportes",
       permissions: {
         dashboard: { read: true, write: false, delete: false },
         leads: { read: true, write: false, delete: false },
@@ -116,16 +117,17 @@ module.exports = (sequelize, DataTypes) => {
         users: { read: false, write: false, delete: false },
         settings: { read: false, write: false, delete: false },
         apikeys: { read: false, write: false, delete: false },
-        admin: { read: false, write: false, delete: false }
-      }
-    }
+        admin: { read: false, write: false, delete: false },
+      },
+    },
   ];
 
+  // ✅ Insertar roles si no existen
   Role.sync().then(() => {
     defaultRoles.forEach(async (roleData) => {
       await Role.findOrCreate({
         where: { name: roleData.name },
-        defaults: roleData
+        defaults: roleData,
       });
     });
   });

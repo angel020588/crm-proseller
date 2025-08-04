@@ -5,7 +5,7 @@ const { User, Role } = require("../server/models");
 const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Token requerido" });
   }
 
@@ -14,7 +14,7 @@ const verifyToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "tu_jwt_secret_aqui",
+      process.env.JWT_SECRET || "tu_jwt_secreto_seguro",
     );
 
     const user = await User.findByPk(decoded.id, {
@@ -34,8 +34,8 @@ const verifyToken = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error("❌ Token inválido:", err.message);
-    res.status(403).json({ message: "Token inválido" });
+    console.error("❌ Error al verificar token:", err.message);
+    return res.status(403).json({ message: "Token inválido o expirado" });
   }
 };
 
