@@ -10,7 +10,13 @@
     "start": "node index.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon index.js",
-    "client": "cd client && npm start"
+    "client": "cd client && npm start",
+    "validate": "node run-validation.js",
+    "validate:basic": "node run-validation.js --basic",
+    "validate:endpoints": "node run-validation.js --endpoints",
+    "test:routes": "node validators/route-validator.js",
+    "test:health": "node validators/quick-health-check.js",
+    "test:endpoints": "node test-all-endpoints.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
