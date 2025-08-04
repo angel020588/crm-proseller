@@ -46,8 +46,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-    }
-  };
 
   const handleForgotPassword = async (e) => {
     e.preventDefault();
