@@ -20,7 +20,7 @@ export default function Login() {
     setError("");
     
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post("/api/auth/login", {
         email,
         password
       });
@@ -43,7 +43,7 @@ export default function Login() {
     setResetMessage("");
     
     try {
-      await axios.post("http://localhost:5000/api/auth/forgot-password", {
+      await axios.post("/api/auth/forgot-password", {
         email: resetEmail
       });
       

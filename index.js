@@ -53,7 +53,7 @@ app.get('*', (req, res) => {
 });
 
 // Inicializar servidor
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
@@ -63,10 +63,11 @@ async function startServer() {
 
     // Ejecutar seeders
     await seedRoles(db);
-    
+
     // Iniciar servidor
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+      console.log(`📱 Accede a tu CRM en: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
     });
 
   } catch (error) {
