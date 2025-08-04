@@ -1,75 +1,61 @@
-// Cargar variables de entorno PRIMERO
+const fs = require("fs");
+const path = require("path");
+const Sequelize = require("sequelize");
 require("dotenv").config();
 
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const { Sequelize } = require("sequelize");
+const db = {};
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+if (!process.env.DATABASE_URL) {
+  console.error(
+    "❌ ERROR: DATABASE_URL no está configurada en el archivo .env",
+  );
+  process.exit(1);
+}
 
-// Verificar que DATABASE_URL esté presente
-console.log("🔍 DATABASE_URL cargada:", process.env.DATABASE_URL ? "SÍ" : "NO");
-console.log(
-  "🔍 Primera parte de la URL:",
-  process.env.DATABASE_URL
-    ? process.env.DATABASE_URL.substring(0, 20) + "..."
-    : "UNDEFINED",
-);
-
-// Configuración de conexión a PostgreSQL con Sequelize
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
-  protocol: "postgres",
   logging: false,
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // necesario para Render
+      rejectUnauthorized: false,
     },
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
   },
 });
 
-// Importar modelos y seeder
-const db = require("./models");
-const seedRoles = require("./seeders/seedRoles");
+const basename = path.basename(__filename);
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Cargar todos los modelos del directorio
+fs.readdirSync(__dirname)
+  .filter(
+    (file) =>
+      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js",
+  )
+  .forEach((file) => {
+    const model = require(path.join(__dirname, file))(
+      sequelize,
+      Sequelize.DataTypes,
+    );
+    db[model.name] = model;
+  });
 
-// Importar rutas activas
-const pingRoutes = require("./routes/pings");
-const pingsRoutes = require("./routes/pings"); // Alias
-const supabaseClientsRoutes = require("./routes/supabase-clients");
-
-// API Routes activas
-app.use("/api/ping", pingRoutes);
-app.use("/api/pings", pingsRoutes);
-app.use("/api/supabase-clients", supabaseClientsRoutes);
-
-// Static files desde React
-app.use(express.static(path.join(__dirname, "client", "build")));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client", "build", "index.html"));
+// Asociar modelos si tienen relaciones
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
 });
 
-// Iniciar base de datos y servidor
-sequelize
-  .sync({ alter: true })
-  .then(async () => {
-    console.log("✅ Base de datos sincronizada correctamente");
-    await seedRoles();
-    console.log("✅ Roles base creados/verificados");
+// Debug para ver los modelos cargados
+console.log("Modelos cargados:", Object.keys(db));
 
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✅ Servidor CRM corriendo en http://0.0.0.0:${PORT}`);
-      console.log(`🚀 Backend API disponible en puerto ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Error al sincronizar base de datos:", err);
-    process.exit(1);
-  });
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
