@@ -1,0 +1,54 @@
+ 🧠 Modelo Client: Client
+[0] ⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+[0] ❌ Error creando tabla: Error: getaddrinfo ENOTFOUND dpg-d26a5g2li9vc73d27b30-a
+[0]     at /home/runner/workspace/server/node_modules/pg-pool/index.js:45:11
+[0]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[0]     at async initDatabase (/home/runner/workspace/server/config/database.js:20:5) {
+[0]   errno: -3008,
+[0]   code: 'ENOTFOUND',
+[0]   syscall: 'getaddrinfo',
+[0]   hostname: 'dpg-d26a5g2li9vc73d27b30-a'
+[0] }
+[0] ✅ PostgreSQL inicializado
+[0] ❌ Error al sincronizar base de datos: HostNotFoundError [SequelizeHostNotFoundError]: getaddrinfo ENOTFOUND dpg-d26a5g2li9vc73d27b30-a
+[0]     at Client._connectionCallback (/home/runner/workspace/server/node_modules/sequelize/lib/dialects/postgres/connection-manager.js:136:24)
+[0]     at Client._handleErrorWhileConnecting (/home/runner/workspace/server/node_modules/pg/lib/client.js:336:19)
+[0]     at Client._handleErrorEvent (/home/runner/workspace/server/node_modules/pg/lib/client.js:346:19)
+[0]     at Connection.emit (node:events:517:28)
+[0]     at Socket.reportStreamError (/home/runner/workspace/server/node_modules/pg/lib/connection.js:57:12)
+[0]     at Socket.emit (node:events:517:28)
+[0]     at emitErrorNT (node:internal/streams/destroy:151:8)
+[0]     at emitErrorCloseNT (node:internal/streams/destroy:116:3)
+[0]     at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+[0]   parent: Error: getaddrinfo ENOTFOUND dpg-d26a5g2li9vc73d27b30-a
+[0]       at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+[0]     errno: -3008,
+[0]     code: 'ENOTFOUND',
+[0]     syscall: 'getaddrinfo',
+[0]     hostname: 'dpg-d26a5g2li9vc73d27b30-a'
+[0]   },
+[0]   original: Error: getaddrinfo ENOTFOUND dpg-d26a5g2li9vc73d27b30-a
+[0]       at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:107:26) {
+[0]     errno: -3008,
+[0]     code: 'ENOTFOUND',
+[0]     syscall: 'getaddrinfo',
+[0]     hostname: 'dpg-d26a5g2li9vc73d27b30-a'
+[0]   }
+[0] }
+[0] cd server && node index.js exited with code 1
+[1] (node:5572) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+[1] (Use `node --trace-deprecation ...` to show where the warning was created)
+[1] (node:5572) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+[1] Starting the development server...
+[1] 
+[1] Compiled successfully!
+[1] 
+[1] You can now view client in the browser.
+[1] 
+[1]   Local:            http://localhost:3001
+[1]   On Your Network:  http://172.31.118.194:3001
+[1] 
+[1] Note that the development build is not optimized.
+[1] To create a production build, use npm run build.
+[1] 
+[1] webpack compiled successfully
