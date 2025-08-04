@@ -5,6 +5,7 @@ require('dotenv').config();
 
 // Import routes desde la raíz
 const pingRoute = require('./routes/ping');
+const pingsRoutes = require('./routes/ping'); // Alias para compatibilidad
 const authRoutes = require('./routes/auth');
 const accountRoutes = require('./routes/account');
 const clientRoutes = require('./routes/clients');
@@ -64,6 +65,7 @@ app.use("/api/notifications", notificationsRoutes);
 app.use("/api/automation", automationRoutes);
 app.use("/api/roles", rolesRoutes);
 app.use("/api/ping", pingRoute);
+app.use("/api/pings", pingsRoutes); // Ruta adicional para pings
 app.use("/api/debug", debugRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/custom-fields", customFieldsRoutes);
