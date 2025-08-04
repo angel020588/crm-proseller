@@ -1,0 +1,113 @@
+Paso 1: Estructurar y limpiar tu repositorio local
+Dentro de la raíz del repo, crea una nueva rama limpia:
+
+bash
+Copiar
+Editar
+git checkout -b clean-deploy
+Asegúrate de tener esta estructura final (en la raíz):
+
+go
+Copiar
+Editar
+.
+├─ package.json      ← contiene scripts build, install-client, start
+├─ index.js          ← tu servidor Express
+└─ client/
+    ├─ package.json
+    ├─ src/
+    └─ ...
+Si actualmente existe una carpeta server/, elimina todo su contenido (y su package.json) después de mover lo esencial arriba.
+
+Verifica que solo exista un package.json en la raíz y otro en client/.
+
+Ejecuta:
+
+bash
+Copiar
+Editar
+git add .
+git commit -m "Mover servidor a raíz y limpiar estructura del repo"
+git push -u origin clean-deploy
+Cuando hayas terminado, dime y vamos al paso 2: configuración limpia en Render.
+
+✅ Paso 2: Configurar correctamente en Render
+– Ve a Settings → Build & Deploy en tu servicio:
+
+Campo	Valor sugerido
+Root Directory	. o campo vacío
+Build Command	npm run build
+Start Command	npm start
+Pre-Deploy	(vacío)
+Build Filters	Elimina todos (para asegurar deploy al cambiar cualquier archivo)
+Auto-Deploy	OFF (para control manual)
+
+📌 Al tener todo en raíz, ya no necesitas usar cd server, ni rutas complicadas.
+El soporte oficial de Render explica que Root Directory define dónde ejecutar los comandos y por defecto es la raíz del repo, si no se cambia manualmente.
+YouTube
++8
+Render
++8
+docs.typo3.org
++8
+blog.memcachier.com
+Render
++8
+Medium
++8
+Reddit
++8
+
+Cuando lo configures, dime y vamos al siguiente paso.
+
+📦 Paso 3: Verificar tu package.json en la raíz
+Asegúrate que tenga scripts como estos:
+
+json
+Copiar
+Editar
+"scripts": {
+  "install-client": "cd client && npm install",
+  "build-client": "cd client && npm run build",
+  "build": "npm install && npm run install-client && npm run build-client",
+  "start": "node index.js"
+}
+Este enfoque funciona bien con Render: el comando npm run build primero instala backend, luego el cliente y construye React.
+
+Haz:
+
+bash
+Copiar
+Editar
+git add package.json
+git commit -m "Agregar scripts build/install-client y start"
+git push origin clean-deploy
+Listo — esto lo usará Render para construir tu app. Dime cuando lo completes.
+
+🚀 Paso 4: Desplegar manualmente en Render
+En Render, dentro del servicio, haz clic en "Manual Deploy → Clear cache & deploy".
+Esto limpia caché antiguo y fuerza una nueva instalación.
+Render
++1
+Render
++1
+
+Mira los logs. Debe aparecer algo como:
+
+arduino
+Copiar
+Editar
+npm run build          # instala backend y cliente
+> client build output
+npm start              # arranca tu Express
+Server running on port ...
+Your service is live
+Si ves error como Cannot find module o Missing script: build, cópialo exactamente y me lo pones aquí — resolvemos juntos.
+
+📄 Tabla resumen rápida
+Paso	Qué hacer	Cómo aviso
+1	Mover server/ a raíz y limpiar repo	Tú me lo dices
+2	Configurar correctamente Root Dir y comandos en Render	Tú me lo dices
+3	Confirmar scripts en package.json y hacer push	Tú me lo dices
+4	Ejecutar deploy limpio y ver logs	Tú me envías logs
+
