@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { Client, Lead, Quotation, Followup } = require('../models');
 const auth = require('../middleware/auth');
