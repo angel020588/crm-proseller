@@ -1,7 +1,13 @@
+// Cargar variables de entorno PRIMERO
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+
+// Debug: Verificar que DATABASE_URL se cargue correctamente
+console.log('🔍 DATABASE_URL cargada:', process.env.DATABASE_URL ? 'SÍ' : 'NO');
+console.log('🔍 Primera parte de la URL:', process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'UNDEFINED');
 
 // Import routes desde la raíz - Solo las que existen
 const pingRoutes = require('./routes/pings');
