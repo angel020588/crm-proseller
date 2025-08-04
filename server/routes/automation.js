@@ -1,15 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
-const Lead = require("../models/Lead");
-const Followup = require("../models/Followup");
+const verifyToken = require("../../middlewares/verifyToken");
+const { Lead, Followup } = require("../models");
 const { Op } = require("sequelize");
 
 // Configuración de automatización por usuario
 const automationRules = new Map();
 
 // Configurar reglas de automatización
-router.post("/rules", auth, async (req, res) => {
+router.post("/rules", verifyToken, async (req, res) => {
   try {
     const { triggers, actions, conditions } = req.body;
     const userId = req.user.id;
@@ -36,7 +35,7 @@ router.post("/rules", auth, async (req, res) => {
 });
 
 // Obtener reglas de automatización
-router.get("/rules", auth, async (req, res) => {
+router.get("/rules", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const rules = automationRules.get(`${userId}_automation`) || {};
@@ -48,7 +47,7 @@ router.get("/rules", auth, async (req, res) => {
 });
 
 // Ejecutar automatización (llamada por cron o eventos)
-router.post("/execute", auth, async (req, res) => {
+router.post("/execute", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const rules = automationRules.get(`${userId}_automation`);
@@ -128,7 +127,7 @@ router.post("/execute", auth, async (req, res) => {
 });
 
 // Templates de seguimiento predefinidos
-router.get("/templates", auth, async (req, res) => {
+router.get("/templates", verifyToken, async (req, res) => {
   try {
     const templates = [
       {
@@ -193,7 +192,7 @@ router.get("/templates", auth, async (req, res) => {
 });
 
 // GET /api/automation
-router.get("/", auth, async (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   try {
     // Placeholder para automatización
     res.json({
@@ -207,7 +206,7 @@ router.get("/", auth, async (req, res) => {
 });
 
 // POST /api/automation
-router.post("/", auth, async (req, res) => {
+router.post("/", verifyToken, async (req, res) => {
   try {
     const { name, trigger, actions } = req.body;
 
