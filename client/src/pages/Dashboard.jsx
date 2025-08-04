@@ -40,7 +40,7 @@ export default function Dashboard() {
         leadsRes,
         followupsRes
       ] = await Promise.all([
-        axios.get(`/api/stats/dashboard?timeframe=${timeframe}`, {
+        axios.get(`/api/dashboard?timeframe=${timeframe}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
