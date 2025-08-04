@@ -1,97 +1,133 @@
 
-const Role = require('../models/Role');
+const { Role } = require('../models');
 
-const checkPermission = (module, action = 'read') => {
+// Middleware para verificar permisos específicos
+const checkPermission = (requiredPermission) => {
   return async (req, res, next) => {
     try {
-      const user = req.user;
-      
-      if (!user) {
-        return res.status(401).json({ error: 'Usuario no autenticado' });
-      }
-
-      // Owner siempre tiene todos los permisos
-      if (user.role === 'owner') {
-        return next();
-      }
-
-      // Buscar el rol del usuario
-      const role = await Role.findOne({ where: { name: user.role } });
-      
-      if (!role) {
-        return res.status(403).json({ error: 'Rol no válido' });
-      }
-
-      // Verificar permisos del módulo
-      const modulePermissions = role.permissions[module];
-      
-      if (!modulePermissions || !modulePermissions[action]) {
-        return res.status(403).json({ 
-          error: `No tienes permisos para ${action} en ${module}`,
-          required: `${module}.${action}`,
-          userRole: user.role
+      if (!req.user) {
+        return res.status(401).json({ 
+          message: 'Usuario no autenticado',
+          code: 'NOT_AUTHENTICATED'
         });
       }
 
-      // Agregar permisos al request para uso posterior
-      req.permissions = role.permissions;
-      req.userRole = role;
+      // Si es admin, permitir todo
+      if (req.user.role === 'admin' || req.user.isAdmin) {
+        return next();
+      }
+
+      // Verificar rol específico
+      const userRole = await Role.findOne({
+        where: { name: req.user.role || 'user' }
+      });
+
+      if (!userRole) {
+        return res.status(403).json({ 
+          message: 'Rol no encontrado',
+          code: 'ROLE_NOT_FOUND'
+        });
+      }
+
+      // Verificar si el rol tiene el permiso requerido
+      const permissions = userRole.permissions || [];
       
+      if (!permissions.includes(requiredPermission)) {
+        return res.status(403).json({ 
+          message: `Permisos insuficientes. Se requiere: ${requiredPermission}`,
+          code: 'INSUFFICIENT_PERMISSIONS',
+          required: requiredPermission,
+          userRole: req.user.role
+        });
+      }
+
       next();
     } catch (error) {
-      console.error('Error verificando permisos:', error);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      console.error('❌ Error verificando permisos:', error);
+      res.status(500).json({ 
+        message: 'Error interno verificando permisos',
+        code: 'PERMISSION_CHECK_ERROR'
+      });
     }
   };
 };
 
-const hasAnyPermission = (modules) => {
+// Middleware para verificar roles específicos
+const checkRole = (allowedRoles) => {
   return async (req, res, next) => {
     try {
-      const user = req.user;
-      
-      if (!user) {
-        return res.status(401).json({ error: 'Usuario no autenticado' });
-      }
-
-      if (user.role === 'owner') {
-        return next();
-      }
-
-      const role = await Role.findOne({ where: { name: user.role } });
-      
-      if (!role) {
-        return res.status(403).json({ error: 'Rol no válido' });
-      }
-
-      // Verificar si tiene al menos un permiso de los módulos solicitados
-      const hasPermission = modules.some(module => {
-        const modulePermissions = role.permissions[module];
-        return modulePermissions && (
-          modulePermissions.read || 
-          modulePermissions.write || 
-          modulePermissions.delete
-        );
-      });
-
-      if (!hasPermission) {
-        return res.status(403).json({ 
-          error: 'No tienes permisos para acceder a este recurso',
-          userRole: user.role
+      if (!req.user) {
+        return res.status(401).json({ 
+          message: 'Usuario no autenticado',
+          code: 'NOT_AUTHENTICATED'
         });
       }
 
-      req.permissions = role.permissions;
-      req.userRole = role;
+      const userRole = req.user.role || 'user';
+      const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+      if (!rolesArray.includes(userRole)) {
+        return res.status(403).json({ 
+          message: `Acceso denegado. Roles permitidos: ${rolesArray.join(', ')}`,
+          code: 'ROLE_ACCESS_DENIED',
+          userRole: userRole,
+          allowedRoles: rolesArray
+        });
+      }
+
       next();
     } catch (error) {
-      console.error('Error verificando permisos:', error);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      console.error('❌ Error verificando rol:', error);
+      res.status(500).json({ 
+        message: 'Error interno verificando rol',
+        code: 'ROLE_CHECK_ERROR'
+      });
+    }
+  };
+};
+
+// Middleware para verificar que el usuario sea propietario del recurso
+const checkOwnership = (resourceModel, resourceIdParam = 'id', userIdField = 'userId') => {
+  return async (req, res, next) => {
+    try {
+      const resourceId = req.params[resourceIdParam];
+      const userId = req.user.id;
+
+      // Si es admin, permitir acceso
+      if (req.user.role === 'admin') {
+        return next();
+      }
+
+      const resource = await resourceModel.findByPk(resourceId);
+      
+      if (!resource) {
+        return res.status(404).json({ 
+          message: 'Recurso no encontrado',
+          code: 'RESOURCE_NOT_FOUND'
+        });
+      }
+
+      if (resource[userIdField] !== userId) {
+        return res.status(403).json({ 
+          message: 'No tienes permisos para acceder a este recurso',
+          code: 'OWNERSHIP_DENIED'
+        });
+      }
+
+      req.resource = resource;
+      next();
+    } catch (error) {
+      console.error('❌ Error verificando propiedad:', error);
+      res.status(500).json({ 
+        message: 'Error interno verificando propiedad',
+        code: 'OWNERSHIP_CHECK_ERROR'
+      });
     }
   };
 };
 
 module.exports = {
   checkPermission,
-  hasAnyPermission
+  checkRole,
+  checkOwnership
 };
