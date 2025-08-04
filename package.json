@@ -4,10 +4,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "server": "nodemon index.js",
-    "start": "node index.js",
-    "build": "echo 'No build step necessary'"
+    "build": "echo 'No build step needed for backend-only project'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
