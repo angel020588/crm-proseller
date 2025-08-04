@@ -7,6 +7,10 @@ localPort = 3000
 externalPort = 80
 
 [[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
 localPort = 4000
 externalPort = 3000
 
@@ -18,7 +22,7 @@ externalPort = 5000
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Deploy CRM"
+runButton = "Desarrollo CRM"
 
 [[workflows.workflow]]
 name = "Deploy CRM"
