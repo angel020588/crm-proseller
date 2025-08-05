@@ -1,9 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-
-// Usa variable de entorno para backend
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+import { API_URL } from "../config/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");

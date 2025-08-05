@@ -1,121 +1,70 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-require("dotenv").config();
 
-// Importar base de datos y modelos
-const db = require("./models");
-const seedRoles = require("./seeders/seedRoles");
-
-// Importar rutas
-const authRoutes = require("./routes/auth");
-const clientRoutes = require("./routes/clients");
-const leadRoutes = require("./routes/leads");
-const followupRoutes = require("./routes/followups");
-const quotationRoutes = require("./routes/quotations");
-const dashboardRoutes = require("./routes/dashboard");
-const webhookRoutes = require("./routes/webhooks");
-const notificationRoutes = require("./routes/notifications");
-const apiKeyRoutes = require("./routes/apikeys");
-const userRoutes = require("./routes/users");
-const adminRoutes = require("./routes/admin");
-const roleRoutes = require("./routes/roles");
-const subscriptionRoutes = require("./routes/subscriptions");
-const superAdminRoutes = require("./routes/super-admin");
-const resumenRoutes = require("./routes/resumen");
-const analyticsRoutes = require("./routes/analytics");
-const automationRoutes = require("./routes/automation");
-const customFieldsRoutes = require("./routes/custom-fields");
-const privadaRoutes = require("./routes/privada");
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos del frontend
-app.use(express.static(path.join(__dirname, "client/build")));
+// Servir archivos estáticos del frontend construido
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Rutas de la API
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/clients', require('./routes/clients'));
+app.use('/api/leads', require('./routes/leads'));
+app.use('/api/quotations', require('./routes/quotations'));
+app.use('/api/followups', require('./routes/followups'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/apikeys', require('./routes/apikeys'));
+app.use('/api/subscriptions', require('./routes/subscriptions'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/roles', require('./routes/roles'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/resumen', require('./routes/resumen'));
+app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/automation', require('./routes/automation'));
+app.use('/api/webhooks', require('./routes/webhooks'));
 
 // Ruta de prueba
-app.get("/api/test", (req, res) => {
-  res.json({
-    message: "✅ API funcionando correctamente",
-    timestamp: new Date(),
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'CRM ProSeller API funcionando',
+    timestamp: new Date().toISOString()
   });
 });
 
-// Rutas API
-app.use("/api/auth", authRoutes);
-app.use("/api/ping", require("./routes/pings"));
-app.use("/api/clients", clientRoutes);
-app.use("/api/leads", leadRoutes);
-app.use("/api/followups", followupRoutes);
-app.use("/api/quotations", quotationRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/apikeys", apiKeyRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/roles", roleRoutes);
-app.use("/api/subscriptions", subscriptionRoutes);
-app.use("/api/super-admin", superAdminRoutes);
-app.use("/api/resumen", resumenRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/automation", automationRoutes);
-app.use("/api/custom-fields", customFieldsRoutes);
-app.use("/api/privada", privadaRoutes);
-
-// Middleware de manejo de errores
-const errorHandler = require("./middleware/errorHandler");
-
-// Catch-all para evitar errores 404 en rutas API
-app.use("/api/*", (req, res) => {
-  res
-    .status(404)
-    .json({ message: `Ruta API no encontrada: ${req.originalUrl}` });
+// Servir el frontend React para todas las rutas no API
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
-// Ruta catch-all para React Router (debe ir ANTES del error handler)
-app.get("*", (req, res) => {
-  const indexPath = path.join(__dirname, "client/build", "index.html");
-  if (require("fs").existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send("Frontend build no encontrado. Ejecuta 'npm run build' en la carpeta client.");
-  }
+// Manejo de errores
+app.use((err, req, res, next) => {
+  console.error('Error:', err.stack);
+  res.status(500).json({ 
+    message: 'Error interno del servidor',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Algo salió mal'
+  });
 });
 
-// Middleware global de errores (debe ir AL FINAL)
-app.use(errorHandler);
+// Iniciar servidor
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor CRM ProSeller ejecutándose en puerto ${PORT}`);
+  console.log(`📱 Frontend: http://localhost:${PORT}`);
+  console.log(`🔗 API: http://localhost:${PORT}/api`);
+  console.log(`💚 Health Check: http://localhost:${PORT}/api/health`);
+});
 
-// Inicializar servidor
-const PORT = process.env.PORT || 3000;
-
-async function startServer() {
-  try {
-    // Sincronizar base de datos
-    await db.sequelize.sync();
-    console.log("✅ Base de datos conectada");
-
-    // Ejecutar seeders
-    await seedRoles(db);
-
-    // Iniciar servidor
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-      console.log(
-        `📱 Accede a tu CRM en: https://${process.env.REPL_SLUG || "workspace"}.${process.env.REPL_OWNER || "ecotisat"}.repl.co`,
-      );
-      console.log(
-        `🧪 Prueba la API en: https://${process.env.REPL_SLUG || "workspace"}.${process.env.REPL_OWNER || "ecotisat"}.repl.co/api/test`,
-      );
-    });
-  } catch (error) {
-    console.error("❌ Error iniciando servidor:", error);
-    process.exit(1);
-  }
-}
-
-startServer();
+module.exports = app;
