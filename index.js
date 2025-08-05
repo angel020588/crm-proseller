@@ -45,25 +45,29 @@ app.get("/api/test", (req, res) => {
 
 // Rutas API
 app.use('/api/auth', authRoutes);
+app.use('/api/ping', require('./routes/pings'));
 app.use('/api/clients', clientRoutes);
 app.use('/api/leads', leadRoutes);
-app.use('/api/quotations', quotationRoutes);
 app.use('/api/followups', followupRoutes);
-app.use('/api/roles', roleRoutes);
+app.use('/api/quotations', quotationRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/apikeys', apiKeyRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/roles', roleRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
-app.use('/api/apikeys', apiKeyRoutes);
-app.use('/api/webhooks', webhookRoutes);
+app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/resumen', resumenRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/custom-fields', customFieldsRoutes);
-app.use('/api', privadaRoutes);
-app.use('/api/roles', require('./routes/roles'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/super-admin', superAdminRoutes);
+app.use('/api/privada', privadaRoutes);
+
+// Catch-all para evitar errores 404 en rutas API
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: `Ruta API no encontrada: ${req.originalUrl}` });
+});
 
 // Ruta catch-all para React Router
 app.get('*', (req, res) => {
