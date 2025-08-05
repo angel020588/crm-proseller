@@ -14,25 +14,25 @@ router.get('/', auth, async (req, res) => {
     }
     const userId = req.user.id;
 
-    // Obtener conteos básicos con validación
+    // Obtener conteos básicos con validación - CORREGIR CAMPO
     const [clientsCount, leadsCount, quotationsCount, followupsCount] = await Promise.all([
-      Client.count({ where: { userId } }).catch(() => 0),
-      Lead.count({ where: { userId } }).catch(() => 0),
+      Client.count({ where: { assignedTo: userId } }).catch(() => 0),
+      Lead.count({ where: { assignedTo: userId } }).catch(() => 0),
       Quotation.count({ where: { userId } }).catch(() => 0),
       Followup.count({ where: { userId } }).catch(() => 0)
     ]);
 
-    // Obtener datos recientes con manejo de errores
+    // Obtener datos recientes con manejo de errores - CORREGIR CAMPOS
     const [recentClients, recentLeads, recentQuotations] = await Promise.all([
       Client.findAll({
-        where: { userId },
+        where: { assignedTo: userId },
         order: [['createdAt', 'DESC']],
         limit: 5,
         attributes: ['id', 'name', 'email', 'createdAt']
       }).catch(() => []),
 
       Lead.findAll({
-        where: { userId },
+        where: { assignedTo: userId },
         order: [['createdAt', 'DESC']],
         limit: 5,
         attributes: ['id', 'name', 'email', 'status', 'createdAt']

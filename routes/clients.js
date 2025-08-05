@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/', auth, async (req, res) => {
   try {
     const clients = await Client.findAll({
-      where: { userId: req.user.id },
+      where: { assignedTo: req.user.id },
       order: [['createdAt', 'DESC']]
     });
     res.json(clients);
