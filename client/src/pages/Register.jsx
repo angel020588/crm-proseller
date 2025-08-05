@@ -97,8 +97,12 @@ export default function Register() {
       
       if (err.response?.data?.message) {
         setError(err.response.data.message);
+      } else if (err.response?.status === 500) {
+        setError("Error interno del servidor. Por favor, intenta de nuevo.");
+      } else if (err.code === 'NETWORK_ERROR' || !err.response) {
+        setError("Error de conexión. Verifica tu internet e intenta de nuevo.");
       } else {
-        setError("Error al crear la cuenta. Verifica tu conexión.");
+        setError("Error al crear la cuenta. Por favor, intenta de nuevo.");
       }
     } finally {
       setLoading(false);

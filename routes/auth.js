@@ -87,6 +87,12 @@ router.post("/register", async (req, res) => {
   console.log("📝 Intentando registrar usuario:", req.body);
   const { name, email, password, roleName = "usuario", recaptchaToken } = req.body;
 
+  // Validar que todos los campos requeridos estén presentes
+  if (!name || !email || !password) {
+    console.log("❌ Campos faltantes:", { name: !!name, email: !!email, password: !!password });
+    return res.status(400).json({ message: "Todos los campos son requeridos" });
+  }
+
   // Verificar ReCaptcha (opcional - implementar si es necesario)
   if (process.env.RECAPTCHA_SECRET && recaptchaToken) {
     try {
@@ -125,18 +131,23 @@ router.post("/register", async (req, res) => {
   }
 
   try {
+    console.log("🔍 Verificando usuario existente...");
     // Verificar si el usuario ya existe
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
+      console.log("❌ Usuario ya existe:", email);
       return res.status(400).json({ message: "El usuario ya existe" });
     }
 
+    console.log("🔍 Buscando rol:", roleName);
     // Buscar el rol
     const role = await Role.findOne({ where: { name: roleName } });
     if (!role) {
+      console.log("❌ Rol no encontrado:", roleName);
       return res.status(400).json({ message: "Rol no válido" });
     }
 
+    console.log("🔄 Creando usuario...");
     // Crear el usuario activo directamente
     const user = await User.create({
       name,
@@ -147,6 +158,7 @@ router.post("/register", async (req, res) => {
       emailVerified: true // Simplificado - sin verificación
     });
 
+    console.log("🔑 Generando token...");
     // Generar token de sesión inmediatamente
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -169,8 +181,12 @@ router.post("/register", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Error en /register:", err);
-    res.status(500).json({ message: "Error al crear el usuario" });
+    console.error("❌ Error detallado en /register:", err);
+    console.error("❌ Stack trace:", err.stack);
+    res.status(500).json({ 
+      message: "Error al crear el usuario",
+      error: process.env.NODE_ENV === 'development' ? err.message : 'Error interno del servidor'
+    });
   }
 });
 
