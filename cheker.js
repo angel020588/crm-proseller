@@ -3,8 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 
-console.log(chalk.blue.bold('🛠️  Iniciando revisión del proyecto CRM...
-'));
+console.log(chalk.blue.bold('🛠️  Iniciando revisión del proyecto CRM...'));
 
 const requiredDirs = ['routes', 'models', 'controllers', 'middleware'];
 const missingDirs = requiredDirs.filter(dir => !fs.existsSync(path.join(__dirname, dir)));
