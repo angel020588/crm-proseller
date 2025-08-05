@@ -5,9 +5,9 @@ const auth = async (req, res, next) => {
   try {
     const authHeader = req.header('Authorization');
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ 
-        message: 'No hay token de autorización', 
+        message: 'Token de autorización requerido', 
         code: 'NO_TOKEN' 
       });
     }
@@ -16,21 +16,15 @@ const auth = async (req, res, next) => {
 
     if (!token || token === 'null' || token === 'undefined') {
       return res.status(401).json({ 
-        message: 'Token inválido o vacío', 
+        message: 'Token inválido', 
         code: 'INVALID_TOKEN' 
       });
     }
 
-    // Verificar que el JWT_SECRET existe
-    if (!process.env.JWT_SECRET) {
-      console.error('❌ JWT_SECRET no está configurado');
-      return res.status(500).json({ 
-        message: 'Error de configuración del servidor',
-        code: 'CONFIG_ERROR'
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Usar JWT_SECRET con fallback
+    const jwtSecret = process.env.JWT_SECRET || "clave-demo";
+    
+    const decoded = jwt.verify(token, jwtSecret);
 
     if (!decoded || !decoded.id) {
       return res.status(401).json({ 
@@ -39,7 +33,14 @@ const auth = async (req, res, next) => {
       });
     }
 
-    const user = await User.findByPk(decoded.id);
+    // Incluir rol en la consulta del usuario
+    const user = await User.findByPk(decoded.id, {
+      include: [{
+        model: require('../models').Role,
+        as: 'Role',
+        attributes: ['id', 'name', 'displayName', 'permissions']
+      }]
+    });
 
     if (!user) {
       return res.status(401).json({ 
@@ -48,15 +49,25 @@ const auth = async (req, res, next) => {
       });
     }
 
-    // Verificar si el usuario está activo (si tienes ese campo)
-    if (user.status === 'inactive') {
+    // Verificar si el usuario está activo
+    if (user.isActive === false) {
       return res.status(401).json({ 
         message: 'Usuario inactivo', 
         code: 'USER_INACTIVE' 
       });
     }
 
-    req.user = user;
+    // Agregar información de rol al req.user
+    req.user = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roleId: user.roleId,
+      role: user.Role?.name || 'usuario',
+      permissions: user.Role?.permissions || {},
+      isActive: user.isActive
+    };
+
     next();
   } catch (error) {
     console.error('❌ Error en middleware de autenticación:', error.message);
@@ -72,6 +83,13 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ 
         message: 'Token expirado', 
         code: 'TOKEN_EXPIRED' 
+      });
+    }
+
+    if (error.name === 'SequelizeDatabaseError') {
+      return res.status(500).json({ 
+        message: 'Error de base de datos', 
+        code: 'DATABASE_ERROR' 
       });
     }
 

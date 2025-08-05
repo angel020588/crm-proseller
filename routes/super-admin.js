@@ -1,13 +1,12 @@
-
 const express = require('express');
-const { User, Subscription, Role } = require('../models');
+const { User, Role, Client, Lead, Quotation, Followup } = require('../models');
 const auth = require('../middleware/auth');
-const bcrypt = require('bcryptjs');
+const { checkRole, checkSuperAdmin } = require('../middleware/permissions');
 
 const router = express.Router();
 
 // Middleware para verificar que solo el super admin puede acceder
-const checkSuperAdmin = (req, res, next) => {
+const checkSuperAdminMiddleware = (req, res, next) => {
   if (req.user.email !== 'fundaciondam2019@gmail.com') {
     return res.status(403).json({ message: 'Acceso denegado - Solo Super Admin' });
   }
@@ -15,7 +14,7 @@ const checkSuperAdmin = (req, res, next) => {
 };
 
 // GET todos los usuarios con datos completos - Solo Super Admin
-router.get('/users', auth, checkSuperAdmin, async (req, res) => {
+router.get('/users', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const users = await User.findAll({
       include: [
@@ -36,10 +35,10 @@ router.get('/users', auth, checkSuperAdmin, async (req, res) => {
     // Agregar datos calculados
     const enrichedUsers = await Promise.all(users.map(async (user) => {
       const userData = user.toJSON();
-      
+
       // Calcular ingresos totales por usuario (simulado)
       userData.totalRevenue = userData.Subscriptions?.length > 0 ? 29.99 : 0;
-      
+
       return userData;
     }));
 
@@ -51,7 +50,7 @@ router.get('/users', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // GET estadísticas completas del sistema - Solo Super Admin
-router.get('/stats', auth, checkSuperAdmin, async (req, res) => {
+router.get('/stats', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const [totalUsers, premiumUsers, activeSubscriptions] = await Promise.all([
       User.count(),
@@ -78,7 +77,7 @@ router.get('/stats', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // POST regalar premium a cualquier usuario - Solo Super Admin
-router.post('/gift-premium', auth, checkSuperAdmin, async (req, res) => {
+router.post('/gift-premium', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const { userId, months } = req.body;
 
@@ -93,7 +92,7 @@ router.post('/gift-premium', auth, checkSuperAdmin, async (req, res) => {
 
     // Buscar o crear suscripción
     let subscription = await Subscription.findOne({ where: { userId } });
-    
+
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + parseInt(months));
 
@@ -118,7 +117,7 @@ router.post('/gift-premium', auth, checkSuperAdmin, async (req, res) => {
       });
     }
 
-    res.json({ 
+    res.json({
       message: `Premium regalado por ${months} meses a ${user.name}`,
       subscription,
       giftedBy: req.user.email,
@@ -131,7 +130,7 @@ router.post('/gift-premium', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // PUT cambiar rol de cualquier usuario - Solo Super Admin
-router.put('/change-role', auth, checkSuperAdmin, async (req, res) => {
+router.put('/change-role', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const { userId, role } = req.body;
 
@@ -142,12 +141,12 @@ router.put('/change-role', auth, checkSuperAdmin, async (req, res) => {
 
     // Buscar el rol por nombre
     const roleObj = await Role.findOne({ where: { name: role } });
-    
+
     await user.update({
       roleId: roleObj ? roleObj.id : null
     });
 
-    res.json({ 
+    res.json({
       message: `Rol cambiado a ${role} para ${user.name}`,
       changedBy: req.user.email,
       timestamp: new Date()
@@ -159,14 +158,14 @@ router.put('/change-role', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // POST crear código de descuento - Solo Super Admin
-router.post('/create-discount', auth, checkSuperAdmin, async (req, res) => {
+router.post('/create-discount', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const { code, discount, maxUses } = req.body;
 
     // Aquí podrías crear una tabla de códigos de descuento
     // Por ahora simulamos la creación
 
-    res.json({ 
+    res.json({
       message: `Código de descuento "${code}" creado`,
       code,
       discount: `${discount}%`,
@@ -181,14 +180,14 @@ router.post('/create-discount', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // POST modo mantenimiento - Solo Super Admin
-router.post('/maintenance', auth, checkSuperAdmin, async (req, res) => {
+router.post('/maintenance', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const { enabled } = req.body;
 
     // Aquí podrías guardar en una tabla de configuración del sistema
     // Por ahora simulamos
 
-    res.json({ 
+    res.json({
       message: `Modo mantenimiento ${enabled ? 'activado' : 'desactivado'}`,
       maintenanceMode: enabled,
       setBy: req.user.email,
@@ -201,7 +200,7 @@ router.post('/maintenance', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // GET reporte financiero - Solo Super Admin
-router.get('/financial-report', auth, checkSuperAdmin, async (req, res) => {
+router.get('/financial-report', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const users = await User.findAll({
       include: [{
@@ -243,15 +242,15 @@ router.get('/financial-report', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // POST notificación global - Solo Super Admin
-router.post('/global-notification', auth, checkSuperAdmin, async (req, res) => {
+router.post('/global-notification', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const { title, message, type } = req.body;
 
     // Aquí podrías crear notificaciones para todos los usuarios
     const users = await User.findAll({ attributes: ['id'] });
-    
+
     // Simular creación de notificaciones
-    res.json({ 
+    res.json({
       message: `Notificación "${title}" enviada a ${users.length} usuarios`,
       title,
       type,
@@ -266,7 +265,7 @@ router.post('/global-notification', auth, checkSuperAdmin, async (req, res) => {
 });
 
 // GET exportar todos los datos - Solo Super Admin
-router.get('/export/all-data', auth, checkSuperAdmin, async (req, res) => {
+router.get('/export/all-data', auth, checkSuperAdminMiddleware, async (req, res) => {
   try {
     const [users, subscriptions] = await Promise.all([
       User.findAll({

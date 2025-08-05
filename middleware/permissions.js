@@ -1,4 +1,3 @@
-
 const { Role } = require('../models');
 
 // Middleware para verificar permisos específicos
@@ -31,7 +30,7 @@ const checkPermission = (requiredPermission) => {
 
       // Verificar si el rol tiene el permiso requerido
       const permissions = userRole.permissions || [];
-      
+
       if (!permissions.includes(requiredPermission)) {
         return res.status(403).json({ 
           message: `Permisos insuficientes. Se requiere: ${requiredPermission}`,
@@ -52,9 +51,9 @@ const checkPermission = (requiredPermission) => {
   };
 };
 
-// Middleware para verificar roles específicos
+// Verificar roles específicos
 const checkRole = (allowedRoles) => {
-  return async (req, res, next) => {
+  return (req, res, next) => {
     try {
       if (!req.user) {
         return res.status(401).json({ 
@@ -63,15 +62,20 @@ const checkRole = (allowedRoles) => {
         });
       }
 
-      const userRole = req.user.role || 'user';
-      const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+      // Obtener rol del usuario, con fallback a 'usuario'
+      const userRole = req.user.role || req.user.Role?.name || 'usuario';
 
-      if (!rolesArray.includes(userRole)) {
+      // Admin tiene acceso a todo
+      if (userRole === 'admin') {
+        return next();
+      }
+
+      if (!allowedRoles.includes(userRole)) {
         return res.status(403).json({ 
-          message: `Acceso denegado. Roles permitidos: ${rolesArray.join(', ')}`,
-          code: 'ROLE_ACCESS_DENIED',
-          userRole: userRole,
-          allowedRoles: rolesArray
+          message: `Acceso denegado. Rol requerido: ${allowedRoles.join(' o ')}`,
+          code: 'INSUFFICIENT_ROLE',
+          required: allowedRoles,
+          current: userRole
         });
       }
 
@@ -84,6 +88,40 @@ const checkRole = (allowedRoles) => {
       });
     }
   };
+};
+
+// Verificar si es super admin
+const checkSuperAdmin = (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ 
+        message: 'Usuario no autenticado',
+        code: 'NOT_AUTHENTICATED'
+      });
+    }
+
+    // Verificar si es el email super admin
+    const superAdminEmails = [
+      'fundaciondam2019@gmail.com',
+      'admin@admin.com',
+      'superadmin@crm.com'
+    ];
+
+    if (!superAdminEmails.includes(req.user.email)) {
+      return res.status(403).json({ 
+        message: 'Acceso restringido solo para Super Administradores',
+        code: 'SUPER_ADMIN_REQUIRED'
+      });
+    }
+
+    next();
+  } catch (error) {
+    console.error('❌ Error verificando super admin:', error);
+    res.status(500).json({ 
+      message: 'Error interno verificando super admin',
+      code: 'SUPER_ADMIN_CHECK_ERROR'
+    });
+  }
 };
 
 // Middleware para verificar que el usuario sea propietario del recurso
@@ -99,7 +137,7 @@ const checkOwnership = (resourceModel, resourceIdParam = 'id', userIdField = 'us
       }
 
       const resource = await resourceModel.findByPk(resourceId);
-      
+
       if (!resource) {
         return res.status(404).json({ 
           message: 'Recurso no encontrado',
@@ -129,5 +167,6 @@ const checkOwnership = (resourceModel, resourceIdParam = 'id', userIdField = 'us
 module.exports = {
   checkPermission,
   checkRole,
+  checkSuperAdmin,
   checkOwnership
 };
