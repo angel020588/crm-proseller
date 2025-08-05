@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Middleware para verificar que solo el super admin puede acceder
 const checkSuperAdminMiddleware = (req, res, next) => {
-  if (req.user.email !== 'fundaciondam2019@gmail.com') {
+  if (req.user.email !== 'ecotisat@gmail.com') {
     return res.status(403).json({ message: 'Acceso denegado - Solo Super Admin' });
   }
   next();

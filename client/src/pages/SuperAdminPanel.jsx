@@ -22,7 +22,7 @@ export default function SuperAdminPanel() {
   const checkSuperAdminAccess = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.email !== 'fundaciondam2019@gmail.com') {
+      if (user.email !== 'ecotisat@gmail.com') {
         navigate('/dashboard');
         return;
       }
@@ -305,7 +305,7 @@ export default function SuperAdminPanel() {
                     <option value="admin">Admin</option>
                     <option value="vip">VIP</option>
                   </select>
-                  {user.email !== 'fundaciondam2019@gmail.com' && (
+                  {user.email !== 'ecotisat@gmail.com' && (
                     <button
                       onClick={() => {
                         if (window.confirm('⚠️ ¿Eliminar este usuario?')) {
