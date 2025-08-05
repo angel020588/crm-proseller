@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +6,6 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [systemStats, setSystemStats] = useState({});
-  const [systemConfig, setSystemConfig] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -16,7 +14,7 @@ export default function AdminPanel() {
   useEffect(() => {
     checkAdminAccess();
     fetchData();
-  }, []);
+  }, [checkAdminAccess, fetchData]); // Added missing dependencies
 
   const checkAdminAccess = async () => {
     try {
@@ -99,7 +97,7 @@ export default function AdminPanel() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setSuccess(`Datos de ${type} descargados correctamente`);
     } catch (error) {
       setError(`Error al descargar datos de ${type}`);
@@ -187,8 +185,8 @@ export default function AdminPanel() {
                   <button
                     onClick={() => toggleUserStatus(user.id, user.isActive)}
                     className={`px-3 py-1 text-xs rounded ${
-                      user.isActive 
-                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                      user.isActive
+                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
                         : 'bg-green-500 hover:bg-green-600 text-white'
                     }`}
                   >
@@ -214,7 +212,7 @@ export default function AdminPanel() {
   const renderDataTab = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">📊 Gestión de Datos</h2>
-      
+
       {/* Descargas */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h3 className="text-lg font-semibold mb-4">📥 Descargar Datos</h3>
@@ -255,7 +253,7 @@ export default function AdminPanel() {
   const renderStatsTab = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">📈 Estadísticas del Sistema</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-blue-500 text-white p-6 rounded-xl">
           <div className="text-3xl font-bold">{systemStats.totalUsers || 0}</div>

@@ -8,7 +8,6 @@ export default function ApiKeys() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 

@@ -13,7 +13,6 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(null);
   const navigate = useNavigate();
 
@@ -233,7 +232,7 @@ export default function Register() {
               Confirmar contraseña
             </label>
             <input
-              type={showConfirmPassword ? "text" : "password"}
+              type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}

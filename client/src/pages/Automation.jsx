@@ -78,16 +78,7 @@ export default function Automation() {
     }
   };
 
-  const useTemplate = (template) => {
-    setFormData({
-      name: template.name,
-      trigger: template.triggers[0],
-      conditions: template.conditions || {},
-      actions: template.actions,
-      active: true
-    });
-    setShowModal(true);
-  };
+  
 
   const addAction = () => {
     setFormData({
