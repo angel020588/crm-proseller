@@ -22,6 +22,11 @@ const adminRoutes = require('./routes/admin');
 const roleRoutes = require('./routes/roles');
 const subscriptionRoutes = require('./routes/subscriptions');
 const superAdminRoutes = require('./routes/super-admin');
+const resumenRoutes = require('./routes/resumen');
+const analyticsRoutes = require('./routes/analytics');
+const automationRoutes = require('./routes/automation');
+const customFieldsRoutes = require('./routes/custom-fields');
+const privadaRoutes = require('./routes/privada');
 
 const app = express();
 
