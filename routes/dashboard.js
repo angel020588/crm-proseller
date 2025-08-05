@@ -8,6 +8,10 @@ const router = express.Router();
 // GET dashboard data principal
 router.get('/', auth, async (req, res) => {
   try {
+    // Verificar que el usuario existe
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Usuario no autenticado' });
+    }
     const userId = req.user.id;
 
     // Obtener conteos básicos con validación

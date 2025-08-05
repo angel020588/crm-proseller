@@ -64,10 +64,16 @@ app.use('/api/automation', automationRoutes);
 app.use('/api/custom-fields', customFieldsRoutes);
 app.use('/api/privada', privadaRoutes);
 
+// Middleware de manejo de errores
+const errorHandler = require('./middleware/errorHandler');
+
 // Catch-all para evitar errores 404 en rutas API
 app.use('/api/*', (req, res) => {
   res.status(404).json({ message: `Ruta API no encontrada: ${req.originalUrl}` });
 });
+
+// Middleware global de errores (debe ir después de todas las rutas)
+app.use(errorHandler);
 
 // Ruta catch-all para React Router
 app.get('*', (req, res) => {
