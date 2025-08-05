@@ -1,371 +1,357 @@
+
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function Dashboard() {
-  const [data, setData] = useState({
-    stats: {},
-    recentClients: [],
-    recentQuotations: [],
-    recentLeads: [],
-    recentFollowups: []
+  const [dashboardData, setDashboardData] = useState({
+    clients: [],
+    leads: [],
+    quotations: [],
+    followups: [],
+    stats: {}
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [timeframe, setTimeframe] = useState('month');
+  const [user, setUser] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardData();
-  }, [timeframe]);
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
-
-      // Verificar que tenemos token
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('❌ No hay token disponible');
         navigate('/login');
         return;
       }
 
-      console.log('🔑 Usando token:', token.substring(0, 20) + '...');
+      const headers = { Authorization: `Bearer ${token}` };
 
+      // Fetch all data in parallel
       const [
         statsRes,
         clientsRes,
-        quotationsRes,
         leadsRes,
-        followupsRes
+        quotationsRes,
+        followupsRes,
+        userRes
       ] = await Promise.all([
-        axios.get(`/api/dashboard?timeframe=${timeframe}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }),
-        axios.get('/api/clients?limit=5', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }),
-        axios.get('/api/quotations?limit=5', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }),
-        axios.get('/api/leads?limit=5', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }),
-        axios.get('/api/followups?limit=5', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        })
+        axios.get('/api/dashboard/stats', { headers }),
+        axios.get('/api/clients', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/leads', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/quotations', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/followups', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/auth/verify', { headers }).catch(() => ({ data: { user: {} } }))
       ]);
 
-      setData({
-        stats: statsRes.data,
-        recentClients: clientsRes.data,
-        recentQuotations: quotationsRes.data,
-        recentLeads: leadsRes.data,
-        recentFollowups: followupsRes.data
+      setDashboardData({
+        clients: clientsRes.data.slice(0, 5) || [],
+        leads: leadsRes.data.slice(0, 5) || [],
+        quotations: quotationsRes.data.slice(0, 5) || [],
+        followups: followupsRes.data.slice(0, 5) || [],
+        stats: statsRes.data || {}
       });
+      
+      setUser(userRes.data.user || {});
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setError('Error al cargar los datos del dashboard');
       if (error.response?.status === 401) {
-        console.error('❌ Token inválido, redirigiendo al login');
         localStorage.removeItem('token');
-        localStorage.removeItem('user');
         navigate('/login');
-      } else {
-        setError('Error al cargar los datos del dashboard');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('es-ES');
-  };
-
-  const getConversionRate = () => {
-    const totalLeads = data.stats.leads?.total || 0;
-    const convertedLeads = data.stats.leads?.converted || 0;
-    return totalLeads > 0 ? ((convertedLeads / totalLeads) * 100).toFixed(1) : 0;
-  };
-
-  const getQuotationSuccessRate = () => {
-    const totalQuotations = data.stats.quotations?.total || 0;
-    const approvedQuotations = data.stats.quotations?.approved || 0;
-    return totalQuotations > 0 ? ((approvedQuotations / totalQuotations) * 100).toFixed(1) : 0;
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-lg text-gray-600">Cargando dashboard...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-100">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">📊 Dashboard Analytics</h1>
-          <p className="text-gray-600 mt-2">Panel de control y métricas avanzadas</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <select
-            value={timeframe}
-            onChange={(e) => setTimeframe(e.target.value)}
-            className="border border-blue-300 p-2 rounded-lg bg-white shadow-sm"
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile Header */}
+      <div className="lg:hidden bg-white shadow-sm border-b px-4 py-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900">CRM ProSeller</h1>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           >
-            <option value="week">Esta semana</option>
-            <option value="month">Este mes</option>
-            <option value="quarter">Este trimestre</option>
-            <option value="year">Este año</option>
-          </select>
-          <div className="flex space-x-4">
-            <Link
-              to="/resumen"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors"
-            >
-              📋 Ver Resumen Completo
-            </Link>
-            {JSON.parse(localStorage.getItem('user') || '{}').role === 'admin' && (
-              <Link
-                to="/admin"
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium shadow-md transition-colors"
-              >
-                🛠️ Panel Admin
-              </Link>
-            )}
-          </div>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          {error}
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)}>
+          <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform transition-transform">
+            <div className="p-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-900">Menú</h2>
+              <p className="text-sm text-gray-600">{user?.name}</p>
+            </div>
+            <nav className="p-4 space-y-2">
+              <Link to="/dashboard" className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                📊 Dashboard
+              </Link>
+              <Link to="/clients" className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                👥 Clientes
+              </Link>
+              <Link to="/leads" className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                🎯 Leads
+              </Link>
+              <Link to="/quotations" className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                📋 Cotizaciones
+              </Link>
+              <Link to="/followups" className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                📞 Seguimientos
+              </Link>
+              <Link to="/perfil" className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                👤 Perfil
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-3 py-2 rounded-md text-red-600 hover:bg-red-50"
+              >
+                🚪 Cerrar Sesión
+              </button>
+            </nav>
+          </div>
         </div>
       )}
 
-      {/* Métricas Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-3xl font-bold">{data.stats.clients?.total || 0}</div>
-              <div className="text-blue-100">Total Clientes</div>
-              {data.stats.clients?.new && (
-                <div className="text-sm text-blue-200">+{data.stats.clients.new} nuevos</div>
-              )}
+      <div className="lg:flex">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:flex lg:flex-shrink-0">
+          <div className="w-64 bg-white shadow-sm border-r">
+            <div className="p-6 border-b">
+              <h1 className="text-xl font-bold text-gray-900">CRM ProSeller</h1>
+              <p className="text-sm text-gray-600 mt-1">{user?.name}</p>
             </div>
-            <div className="text-4xl opacity-80">👥</div>
+            <nav className="p-4 space-y-1">
+              <Link to="/dashboard" className="flex items-center px-3 py-2 rounded-md text-gray-900 bg-blue-50 border-r-2 border-blue-600">
+                📊 Dashboard
+              </Link>
+              <Link to="/clients" className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                👥 Clientes
+              </Link>
+              <Link to="/leads" className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                🎯 Leads
+              </Link>
+              <Link to="/quotations" className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                📋 Cotizaciones
+              </Link>
+              <Link to="/followups" className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                📞 Seguimientos
+              </Link>
+              <Link to="/perfil" className="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100">
+                👤 Perfil
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center w-full px-3 py-2 rounded-md text-red-600 hover:bg-red-50"
+              >
+                🚪 Cerrar Sesión
+              </button>
+            </nav>
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-3xl font-bold">{data.stats.leads?.total || 0}</div>
-              <div className="text-purple-100">Total Leads</div>
-              <div className="text-sm text-purple-200">{getConversionRate()}% conversión</div>
+        {/* Main Content */}
+        <div className="flex-1 p-4 lg:p-8">
+          {error && (
+            <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
             </div>
-            <div className="text-4xl opacity-80">🎯</div>
-          </div>
-        </div>
+          )}
 
-        <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-3xl font-bold">{data.stats.quotations?.total || 0}</div>
-              <div className="text-green-100">Cotizaciones</div>
-              <div className="text-sm text-green-200">{getQuotationSuccessRate()}% aprobadas</div>
-            </div>
-            <div className="text-4xl opacity-80">💼</div>
+          {/* Welcome Section */}
+          <div className="mb-6">
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
+              ¡Bienvenido, {user?.name}! 👋
+            </h2>
+            <p className="text-gray-600 mt-1">
+              Aquí tienes un resumen de tu actividad comercial
+            </p>
           </div>
-        </div>
 
-        <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-6 rounded-xl shadow-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-3xl font-bold">
-                {formatCurrency(data.stats.revenue?.total || 0)}
-              </div>
-              <div className="text-yellow-100">Ingresos</div>
-              {data.stats.revenue?.growth && (
-                <div className="text-sm text-yellow-200">
-                  {data.stats.revenue.growth > 0 ? '+' : ''}{data.stats.revenue.growth}%
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <span className="text-xl lg:text-2xl">👥</span>
                 </div>
-              )}
-            </div>
-            <div className="text-4xl opacity-80">💰</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Métricas Secundarias */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">📈 Rendimiento de Leads</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Nuevos:</span>
-              <span className="font-semibold">{data.stats.leads?.new || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Contactados:</span>
-              <span className="font-semibold">{data.stats.leads?.contacted || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Convertidos:</span>
-              <span className="font-semibold text-green-600">{data.stats.leads?.converted || 0}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">💼 Estado Cotizaciones</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Pendientes:</span>
-              <span className="font-semibold text-yellow-600">{data.stats.quotations?.pending || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Enviadas:</span>
-              <span className="font-semibold text-blue-600">{data.stats.quotations?.sent || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Aprobadas:</span>
-              <span className="font-semibold text-green-600">{data.stats.quotations?.approved || 0}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">📞 Seguimientos</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Pendientes:</span>
-              <span className="font-semibold text-red-600">{data.stats.followups?.pending || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Hoy:</span>
-              <span className="font-semibold text-orange-600">{data.stats.followups?.today || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Esta semana:</span>
-              <span className="font-semibold">{data.stats.followups?.thisWeek || 0}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Actividad Reciente */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Clientes Recientes */}
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900">👥 Clientes Recientes</h2>
-            <Link to="/clients" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-              Ver todos →
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {data.recentClients.slice(0, 5).map((client) => (
-              <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <div className="font-medium text-gray-900">{client.name}</div>
-                  <div className="text-sm text-gray-600">{client.email}</div>
-                </div>
-                <div className="text-xs text-gray-500">
-                  {formatDate(client.createdAt)}
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-600">Clientes</p>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                    {dashboardData.stats.totalClients || 0}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Leads Recientes */}
-        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900">🎯 Leads Recientes</h2>
-            <Link to="/leads" className="text-purple-600 hover:text-purple-800 text-sm font-medium">
-              Ver todos →
+            <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <span className="text-xl lg:text-2xl">🎯</span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-600">Leads</p>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                    {dashboardData.stats.totalLeads || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <span className="text-xl lg:text-2xl">📋</span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-600">Cotizaciones</p>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                    {dashboardData.stats.totalQuotations || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 lg:p-6 rounded-lg shadow-sm border">
+              <div className="flex items-center">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <span className="text-xl lg:text-2xl">📞</span>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-600">Seguimientos</p>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                    {dashboardData.stats.totalFollowups || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Link
+              to="/clients"
+              className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg text-center transition-colors"
+            >
+              <div className="text-2xl lg:text-3xl mb-2">👥</div>
+              <div className="text-sm lg:text-base font-medium">Gestionar Clientes</div>
+            </Link>
+
+            <Link
+              to="/leads"
+              className="bg-green-600 hover:bg-green-700 text-white p-4 rounded-lg text-center transition-colors"
+            >
+              <div className="text-2xl lg:text-3xl mb-2">🎯</div>
+              <div className="text-sm lg:text-base font-medium">Nuevos Leads</div>
+            </Link>
+
+            <Link
+              to="/quotations"
+              className="bg-yellow-600 hover:bg-yellow-700 text-white p-4 rounded-lg text-center transition-colors"
+            >
+              <div className="text-2xl lg:text-3xl mb-2">📋</div>
+              <div className="text-sm lg:text-base font-medium">Crear Cotización</div>
+            </Link>
+
+            <Link
+              to="/followups"
+              className="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-lg text-center transition-colors"
+            >
+              <div className="text-2xl lg:text-3xl mb-2">📞</div>
+              <div className="text-sm lg:text-base font-medium">Seguimientos</div>
             </Link>
           </div>
-          <div className="space-y-3">
-            {data.recentLeads.slice(0, 5).map((lead) => (
-              <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <div className="font-medium text-gray-900">{lead.name}</div>
-                  <div className="text-sm text-gray-600">{lead.company || lead.email}</div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    lead.status === 'convertido' ? 'bg-green-100 text-green-800' :
-                    lead.status === 'calificado' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {lead.status}
-                  </span>
-                  <div className="text-xs text-gray-500">
-                    {formatDate(lead.createdAt)}
+
+          {/* Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recent Clients */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-4 lg:p-6 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">Últimos Clientes</h3>
+              </div>
+              <div className="p-4 lg:p-6">
+                {dashboardData.clients.length > 0 ? (
+                  <div className="space-y-3">
+                    {dashboardData.clients.map((client) => (
+                      <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm lg:text-base">{client.name}</p>
+                          <p className="text-xs lg:text-sm text-gray-600">{client.email}</p>
+                        </div>
+                        <Link
+                          to={`/clients/${client.id}`}
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          Ver →
+                        </Link>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No hay clientes recientes</p>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+            </div>
 
-      {/* Accesos Rápidos */}
-      <div className="mt-8 bg-white rounded-xl shadow-md p-6 border border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🚀 Acciones Rápidas</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button
-            onClick={() => navigate('/leads')}
-            className="p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-center transition-colors border border-purple-200"
-          >
-            <div className="text-2xl mb-2">🎯</div>
-            <div className="text-sm font-medium text-purple-900">Nuevo Lead</div>
-          </button>
-          <button
-            onClick={() => navigate('/clients')}
-            className="p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-center transition-colors border border-blue-200"
-          >
-            <div className="text-2xl mb-2">👥</div>
-            <div className="text-sm font-medium text-blue-900">Nuevo Cliente</div>
-          </button>
-          <button
-            onClick={() => navigate('/quotations')}
-            className="p-4 bg-green-50 hover:bg-green-100 rounded-lg text-center transition-colors border border-green-200"
-          >
-            <div className="text-2xl mb-2">💼</div>
-            <div className="text-sm font-medium text-green-900">Nueva Cotización</div>
-          </button>
-          <button
-            onClick={() => navigate('/followups')}
-            className="p-4 bg-yellow-50 hover:bg-yellow-100 rounded-lg text-center transition-colors border border-yellow-200"
-          >
-            <div className="text-2xl mb-2">📞</div>
-            <div className="text-sm font-medium text-yellow-900">Seguimiento</div>
-          </button>
+            {/* Recent Followups */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-4 lg:p-6 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">Próximos Seguimientos</h3>
+              </div>
+              <div className="p-4 lg:p-6">
+                {dashboardData.followups.length > 0 ? (
+                  <div className="space-y-3">
+                    {dashboardData.followups.map((followup) => (
+                      <div key={followup.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 text-sm lg:text-base">{followup.subject}</p>
+                          <p className="text-xs lg:text-sm text-gray-600">
+                            {new Date(followup.scheduledDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Link
+                          to={`/followups/${followup.id}`}
+                          className="text-purple-600 hover:text-purple-800 text-sm"
+                        >
+                          Ver →
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No hay seguimientos pendientes</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
