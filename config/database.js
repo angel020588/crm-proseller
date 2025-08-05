@@ -1,37 +1,19 @@
+// config/database.js
+const { Sequelize } = require("sequelize");
+require("dotenv").config();
 
-const { Sequelize } = require('sequelize');
-require('dotenv').config();
+// Asegúrate de tener esto correctamente en tu archivo .env:
+// DATABASE_URL=postgresql://usuario:password@host:puerto/nombre_db
 
-const sequelize = new Sequelize(
-  process.env.DATABASE_URL || 'postgresql://localhost:5432/crm_proseller',
-  {
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: process.env.NODE_ENV === 'production' ? {
-        require: true,
-        rejectUnauthorized: false
-      } : false
-    },
-    logging: process.env.NODE_ENV === 'development' ? console.log : false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
-  }
-);
+const connectionString = process.env.DATABASE_URL;
 
-// Test connection
-const testConnection = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Conexión a la base de datos establecida correctamente.');
-  } catch (error) {
-    console.error('❌ No se pudo conectar a la base de datos:', error);
-  }
-};
+if (!connectionString) {
+  throw new Error("DATABASE_URL no está definido en .env");
+}
 
-testConnection();
+const sequelize = new Sequelize(connectionString, {
+  dialect: "postgres",
+  logging: false, // Puedes activarlo si quieres ver los queries en consola
+});
 
-module.exports = { sequelize };
+module.exports = sequelize;

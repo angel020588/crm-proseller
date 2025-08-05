@@ -43,32 +43,23 @@ const defineAssociations = () => {
 
   // ApiKey associations
   ApiKey.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+  // config/database.js
+  const { Sequelize } = require('sequelize');
+  require('dotenv').config();
 
-  // Role associations
-  Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
+  // Asegúrate de tener esto correctamente en tu archivo .env:
+  // DATABASE_URL=postgresql://usuario:password@host:puerto/nombre_db
 
-  // Notification associations
-  Notification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+  const connectionString = process.env.DATABASE_URL;
 
-  // Subscription associations
-  Subscription.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-};
+  if (!connectionString) {
+    throw new Error('DATABASE_URL no está definido en .env');
+  }
 
-// Define associations
-defineAssociations();
+  const sequelize = new Sequelize(connectionString, {
+    dialect: 'postgres',
+    logging: false, // Puedes activarlo si quieres ver los queries en consola
+  });
 
-const db = {
-  sequelize,
-  Sequelize: require('sequelize'),
-  User,
-  Client,
-  Lead,
-  Followup,
-  Quotation,
-  ApiKey,
-  Role,
-  Notification,
-  Subscription
-};
+  module.exports = sequelize;
 
-module.exports = db;
