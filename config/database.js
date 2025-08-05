@@ -1,42 +1,36 @@
 
-require('dotenv').config();
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-// Parsear manualmente la URL para evitar errores de Sequelize
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error('DATABASE_URL no está configurada');
-}
-
-// Limpiar la URL si viene con el prefijo DATABASE_URL=
-const cleanUrl = databaseUrl.startsWith('DATABASE_URL=') 
-  ? databaseUrl.replace('DATABASE_URL=', '') 
-  : databaseUrl;
-
-// Extraer componentes de la URL manualmente
-const url = new URL(cleanUrl);
-
-const sequelize = new Sequelize({
-  database: url.pathname.slice(1), // Remover el '/' inicial
-  username: url.username,
-  password: url.password,
-  host: url.hostname,
-  port: url.port || 5432,
+const sequelize = new Sequelize(process.env.DATABASE_URL || 'postgresql://localhost:5432/crm_db', {
   dialect: 'postgres',
-  logging: false,
+  logging: process.env.NODE_ENV === 'development' ? console.log : false,
   dialectOptions: {
-    ssl: {
+    ssl: process.env.NODE_ENV === 'production' ? {
       require: true,
-      rejectUnauthorized: false,
-    },
+      rejectUnauthorized: false
+    } : false
   },
   pool: {
-    max: 10,
+    max: 5,
     min: 0,
     acquire: 30000,
     idle: 10000
   }
 });
 
-module.exports = sequelize;
+const initDatabase = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Conexión a la base de datos establecida correctamente.');
+    return sequelize;
+  } catch (error) {
+    console.error('❌ No se pudo conectar a la base de datos:', error);
+    throw error;
+  }
+};
+
+module.exports = {
+  sequelize,
+  initDatabase
+};

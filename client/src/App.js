@@ -1,6 +1,13 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
+
+// Configurar URL base de la API
+const API_BASE_URL = process.env.REACT_APP_API_URL || process.env.NODE_ENV === 'production' 
+  ? '/api' 
+  : 'http://0.0.0.0:5000/api';
+
+axios.defaults.baseURL = API_BASE_URL;
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +9,7 @@ export default function Roles() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('roles');
+  const [selectedUsers, setSelectedUsers] = useState([]); // Corrected: initialized as an array
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -77,7 +77,7 @@ export default function Roles() {
   const assignRole = async (userId, roleId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/roles/assign', 
+      await axios.post('http://localhost:5000/api/roles/assign',
         { userId, roleId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -204,7 +204,7 @@ export default function Roles() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">{role.description}</p>
-                  
+
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium">Permisos:</h4>
                     <div className="grid grid-cols-3 gap-1 text-xs">
@@ -279,7 +279,7 @@ export default function Roles() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          onClick={() => setSelectedUser(user)}
+                          onClick={() => setSelectedUsers([user])} // Corrected: Pass user as an array
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Ver Permisos
@@ -324,7 +324,7 @@ export default function Roles() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
                     <textarea

@@ -77,13 +77,18 @@ app.use("/api/*", (req, res) => {
     .json({ message: `Ruta API no encontrada: ${req.originalUrl}` });
 });
 
-// Middleware global de errores (debe ir después de todas las rutas)
-app.use(errorHandler);
-
-// Ruta catch-all para React Router
+// Ruta catch-all para React Router (debe ir ANTES del error handler)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+  const indexPath = path.join(__dirname, "client/build", "index.html");
+  if (require("fs").existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("Frontend build no encontrado. Ejecuta 'npm run build' en la carpeta client.");
+  }
 });
+
+// Middleware global de errores (debe ir AL FINAL)
+app.use(errorHandler);
 
 // Inicializar servidor
 const PORT = process.env.PORT || 3000;
