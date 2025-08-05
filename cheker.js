@@ -1,49 +1,53 @@
 // checker.js
-const fs = require('fs');
-const path = require('path');
-const chalk = require('chalk');
+const fs = require("fs");
+const path = require("path");
+const chalk = require("chalk");
 
-console.log(chalk.blue.bold('🛠️  Iniciando revisión del proyecto CRM...'));
+console.log(chalk.blue.bold("🛠️  Iniciando revisión del proyecto CRM..."));
 
-const requiredDirs = ['routes', 'models', 'controllers', 'middleware'];
-const missingDirs = requiredDirs.filter(dir => !fs.existsSync(path.join(__dirname, dir)));
+const requiredDirs = ["routes", "models", "controllers", "middleware"];
+const missingDirs = requiredDirs.filter(
+  (dir) => !fs.existsSync(path.join(__dirname, dir)),
+);
 
 if (missingDirs.length) {
-  console.log(chalk.red('❌ Carpetas faltantes:'));
-  missingDirs.forEach(dir => console.log(` - ${dir}`));
+  console.log(chalk.red("❌ Carpetas faltantes:"));
+  missingDirs.forEach((dir) => console.log(` - ${dir}`));
 } else {
-  console.log(chalk.green('✅ Todas las carpetas requeridas existen.'));
+  console.log(chalk.green("✅ Todas las carpetas requeridas existen."));
 }
 
-console.log('\n🔍 Revisando package.json y dependencias instaladas...');
+console.log("\n🔍 Revisando package.json y dependencias instaladas...");
 
 let packageJson;
 try {
-  packageJson = require('./package.json');
+  packageJson = require("./package.json");
 } catch (err) {
-  console.error(chalk.red('❌ No se encontró package.json'));
+  console.error(chalk.red("❌ No se encontró package.json"));
   process.exit(1);
 }
 
-const installedDeps = Object.keys(require('./package.json').dependencies || {});
-const nodeModulesPath = path.join(__dirname, 'node_modules');
-const missingDeps = installedDeps.filter(dep => !fs.existsSync(path.join(nodeModulesPath, dep)));
+const installedDeps = Object.keys(require("./package.json").dependencies || {});
+const nodeModulesPath = path.join(__dirname, "node_modules");
+const missingDeps = installedDeps.filter(
+  (dep) => !fs.existsSync(path.join(nodeModulesPath, dep)),
+);
 
 if (missingDeps.length) {
-  console.log(chalk.red('❌ Dependencias que faltan instalar:'));
-  missingDeps.forEach(dep => console.log(` - ${dep}`));
+  console.log(chalk.red("❌ Dependencias que faltan instalar:"));
+  missingDeps.forEach((dep) => console.log(` - ${dep}`));
 } else {
-  console.log(chalk.green('✅ Todas las dependencias están instaladas.'));
+  console.log(chalk.green("✅ Todas las dependencias están instaladas."));
 }
 
-console.log('\n📂 Revisando archivos por imports/requires rotos...');
+console.log("\n📂 Revisando archivos por imports/requires rotos...");
 
 function walk(dir, callback) {
-  fs.readdirSync(dir).forEach(file => {
+  fs.readdirSync(dir).forEach((file) => {
     const fullPath = path.join(dir, file);
     if (fs.lstatSync(fullPath).isDirectory()) {
       walk(fullPath, callback);
-    } else if (file.endsWith('.js')) {
+    } else if (file.endsWith(".js")) {
       callback(fullPath);
     }
   });
@@ -52,28 +56,38 @@ function walk(dir, callback) {
 const brokenImports = [];
 
 walk(__dirname, (file) => {
-  const content = fs.readFileSync(file, 'utf8');
+  const content = fs.readFileSync(file, "utf8");
   const importRegex = /require\(['"](\.\/[^'"]+)['"]\)/g;
   let match;
   while ((match = importRegex.exec(content)) !== null) {
     const requiredPath = path.resolve(path.dirname(file), match[1]);
-    if (!fs.existsSync(requiredPath) && !fs.existsSync(requiredPath + '.js') && !fs.existsSync(path.join(requiredPath, 'index.js'))) {
+    if (
+      !fs.existsSync(requiredPath) &&
+      !fs.existsSync(requiredPath + ".js") &&
+      !fs.existsSync(path.join(requiredPath, "index.js"))
+    ) {
       brokenImports.push({ file, import: match[1] });
     }
   }
 });
 
 if (brokenImports.length) {
-  console.log(chalk.red('❌ Imports rotos detectados:'));
-  brokenImports.forEach(b => console.log(` - Archivo: ${b.file}\n   ➤ Import inválido: '${b.import}'`));
+  console.log(chalk.red("❌ Imports rotos detectados:"));
+  brokenImports.forEach((b) =>
+    console.log(` - Archivo: ${b.file}\n   ➤ Import inválido: '${b.import}'`),
+  );
 } else {
-  console.log(chalk.green('✅ No se detectaron imports rotos.'));
+  console.log(chalk.green("✅ No se detectaron imports rotos."));
 }
 
-console.log(chalk.blue('\n🔚 Revisión finalizada.'));
+console.log(chalk.blue("\n🔚 Revisión finalizada."));
 
 if (missingDirs.length || missingDeps.length || brokenImports.length) {
-  console.log(chalk.yellow.bold('\n⚠️  Se encontraron problemas. Revisa los errores anteriores.'));
+  console.log(
+    chalk.yellow.bold(
+      "\n⚠️  Se encontraron problemas. Revisa los errores anteriores.",
+    ),
+  );
 } else {
-  console.log(chalk.green.bold('\n🎉 Todo en orden. Tu proyecto está limpio.'));
+  console.log(chalk.green.bold("\n🎉 Todo en orden. Tu proyecto está limpio."));
 }
