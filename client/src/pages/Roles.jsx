@@ -6,7 +6,9 @@ export default function Roles() {
   const navigate = useNavigate();
   const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('roles');
   const [selectedUsers, setSelectedUsers] = useState([]); // Corrected: initialized as an array
@@ -279,7 +281,7 @@ export default function Roles() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          onClick={() => setSelectedUsers([user])} // Corrected: Pass user as an array
+                          onClick={() => setSelectedUser(user)}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Ver Permisos
@@ -410,6 +412,39 @@ export default function Roles() {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+           {/* Modal to display selected user's permissions */}
+           {selectedUser && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+              <div className="relative top-20 mx-auto p-5 border w-2/3 max-w-4xl shadow-lg rounded-md bg-white max-h-screen overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Permisos de {selectedUser.name}
+                  </h3>
+                  <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600">
+                    &times;
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Roles Asignados:</h4>
+                  {/* Assuming user has a roles array or similar */}
+                  {selectedUser.roles && selectedUser.roles.length > 0 ? (
+                    selectedUser.roles.map(role => (
+                      <span key={role.id} className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(role.name)} mr-2`}>
+                        {role.displayName}
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">No tiene roles asignados.</p>
+                  )}
+                </div>
+                <div className="mt-4 space-y-2">
+                  <h4 className="text-sm font-medium">Permisos Detallados:</h4>
+                  {/* This section would ideally fetch and display detailed permissions */}
+                  <p className="text-sm text-gray-500">Cargando permisos detallados...</p>
+                </div>
               </div>
             </div>
           )}
