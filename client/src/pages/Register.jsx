@@ -1,7 +1,10 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+
+// Reemplaza por tu dominio de backend si estás en producción
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://crm-ecotisat.replit.app";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -9,8 +12,9 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    roleName: "usuario"
+    roleName: "usuario",
   });
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -18,29 +22,38 @@ export default function Register() {
   const [passwordStrength, setPasswordStrength] = useState(null);
   const navigate = useNavigate();
 
-  // Evaluar fuerza de contraseña en tiempo real
   const evaluatePasswordStrength = (password) => {
     let score = 0;
     let feedback = [];
 
-    if (password.length >= 8) score += 1;
+    if (password.length >= 8) score++;
     else feedback.push("Mínimo 8 caracteres");
-
-    if (/[a-z]/.test(password)) score += 1;
+    if (/[a-z]/.test(password)) score++;
     else feedback.push("Incluye minúsculas");
-
-    if (/[A-Z]/.test(password)) score += 1;
+    if (/[A-Z]/.test(password)) score++;
     else feedback.push("Incluye mayúsculas");
-
-    if (/[0-9]/.test(password)) score += 1;
+    if (/[0-9]/.test(password)) score++;
     else feedback.push("Incluye números");
-
-    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
     else feedback.push("Incluye símbolos");
 
-    const strength = score <= 2 ? 'débil' : score <= 3 ? 'media' : score <= 4 ? 'fuerte' : 'muy fuerte';
-    const color = score <= 2 ? 'red' : score <= 3 ? 'yellow' : score <= 4 ? 'blue' : 'green';
-    
+    const strength =
+      score <= 2
+        ? "débil"
+        : score <= 3
+          ? "media"
+          : score <= 4
+            ? "fuerte"
+            : "muy fuerte";
+    const color =
+      score <= 2
+        ? "red"
+        : score <= 3
+          ? "yellow"
+          : score <= 4
+            ? "blue"
+            : "green";
+
     return { score, strength, feedback, color };
   };
 
@@ -53,18 +66,17 @@ export default function Register() {
   }, [formData.password]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
+    setLoading(true);
 
-    // Validaciones
     if (formData.password !== formData.confirmPassword) {
       setError("Las contraseñas no coinciden");
       setLoading(false);
@@ -78,35 +90,40 @@ export default function Register() {
     }
 
     try {
-      const res = await axios.post("/api/auth/register", {
+      const res = await axios.post(`${API_URL}/api/auth/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        roleName: formData.roleName
+        roleName: formData.roleName,
       });
 
-      // Auto-login después del registro
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      const { token, user } = res.data;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         navigate("/dashboard");
       }
     } catch (err) {
-      console.error("❌ Error en registro:", err);
-      
       if (err.response?.data?.message) {
         setError(err.response.data.message);
-      } else if (err.response?.status === 500) {
-        setError("Error interno del servidor. Por favor, intenta de nuevo.");
-      } else if (err.code === 'NETWORK_ERROR' || !err.response) {
-        setError("Error de conexión. Verifica tu internet e intenta de nuevo.");
+      } else if (err.code === "NETWORK_ERROR" || !err.response) {
+        setError("Error de conexión. Verifica tu internet.");
       } else {
-        setError("Error al crear la cuenta. Por favor, intenta de nuevo.");
+        setError("Error al registrar. Intenta nuevamente.");
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Mapa de colores para Tailwind (porque clases dinámicas no aplican directamente)
+  const tailwindColorMap = {
+    red: "bg-red-500 text-red-600",
+    yellow: "bg-yellow-500 text-yellow-600",
+    blue: "bg-blue-500 text-blue-600",
+    green: "bg-green-500 text-green-600",
   };
 
   return (
@@ -123,133 +140,123 @@ export default function Register() {
         )}
 
         <form onSubmit={handleRegister}>
+          {/* Nombre */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-sm font-medium text-gray-700">
               Nombre completo
             </label>
             <input
               type="text"
               name="name"
-              placeholder="Tu nombre completo"
               value={formData.name}
               onChange={handleChange}
+              placeholder="Tu nombre completo"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
 
+          {/* Email */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-sm font-medium text-gray-700">
               Correo electrónico
             </label>
             <input
               type="email"
               name="email"
-              placeholder="tu@email.com"
               value={formData.email}
               onChange={handleChange}
+              placeholder="tu@email.com"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
 
+          {/* Contraseña */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-sm font-medium text-gray-700">
               Contraseña
             </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Mínimo 8 caracteres con mayúsculas, números y símbolos"
                 value={formData.password}
                 onChange={handleChange}
+                placeholder="Tu contraseña"
                 required
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
               >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                👁️
               </button>
             </div>
-            
-            {/* Indicador de fuerza de contraseña */}
+
             {passwordStrength && (
               <div className="mt-2">
                 <div className="flex items-center space-x-2">
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 bg-${passwordStrength.color}-500`}
-                      style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
-                    ></div>
+                    <div
+                      className={`h-2 rounded-full transition-all duration-300 ${tailwindColorMap[passwordStrength.color]}`}
+                      style={{
+                        width: `${(passwordStrength.score / 5) * 100}%`,
+                      }}
+                    />
                   </div>
-                  <span className={`text-sm font-medium text-${passwordStrength.color}-600`}>
+                  <span
+                    className={`text-xs font-medium ${tailwindColorMap[passwordStrength.color]}`}
+                  >
                     {passwordStrength.strength}
                   </span>
                 </div>
                 {passwordStrength.feedback.length > 0 && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Mejoras: {passwordStrength.feedback.join(', ')}
+                    Mejoras: {passwordStrength.feedback.join(", ")}
                   </p>
                 )}
               </div>
             )}
           </div>
 
+          {/* Confirmar contraseña */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-sm font-medium text-gray-700">
               Confirmar contraseña
             </label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
-                placeholder="Repite tu contraseña"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                placeholder="Repite tu contraseña"
                 required
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
               >
-                {showConfirmPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                👁️
               </button>
             </div>
           </div>
 
+          {/* Tipo de cuenta */}
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
+            <label className="block text-sm font-medium text-gray-700">
               Tipo de cuenta
             </label>
             <select
               name="roleName"
               value={formData.roleName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="usuario">👤 Usuario</option>
               <option value="editor">✏️ Editor</option>
@@ -261,7 +268,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? "Creando cuenta..." : "Crear Cuenta"}
           </button>
