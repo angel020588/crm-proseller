@@ -11,7 +11,7 @@ export default function Roles() {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [activeTab, setActiveTab] = useState('roles');
-  const [selectedUsers, setSelectedUsers] = useState([]); // Corrected: initialized as an array
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     displayName: '',
@@ -37,7 +37,7 @@ export default function Roles() {
   const fetchRoles = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/roles', {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/roles`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRoles(response.data);
@@ -51,7 +51,7 @@ export default function Roles() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users', {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers(response.data);
@@ -64,7 +64,7 @@ export default function Roles() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/roles', formData, {
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/roles`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       fetchRoles();
@@ -79,7 +79,7 @@ export default function Roles() {
   const assignRole = async (userId, roleId) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:5000/api/roles/assign',
+      await axios.post(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/roles/assign`,
         { userId, roleId },
         { headers: { Authorization: `Bearer ${token}` } }
       );

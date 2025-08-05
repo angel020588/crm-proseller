@@ -18,7 +18,7 @@ externalPort = 5000
 channel = "stable-25_05"
 
 [workflows]
-runButton = "CRM Funcional"
+runButton = "CRM Production"
 
 [[workflows.workflow]]
 name = "Deploy CRM"
@@ -75,6 +75,31 @@ args = "cd client && npm run build"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=5000 node index.js"
+
+[[workflows.workflow]]
+name = "CRM Production"
+author = 43938259
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npm run build"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd .."
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
