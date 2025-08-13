@@ -1,14 +1,53 @@
-version: '3.8'
+version: "3.8"
+
 services:
-  crm-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  crm:
+    container_name: ultrabase_crm
+    build: /opt/crm
     env_file:
       - .env.crm
+    depends_on:
+      - ultrabase_db
+      - ultrabase_api
+    restart: unless-stopped
     ports:
       - "4000:4000"
-    restart: unless-stopped
+
+  ultrabase_db:
+    image: postgres:15
+    container_name: ultrabase_db
     environment:
-      - ENTRYPOINT=server-index.js
-    depends_on: []
+      POSTGRES_PASSWORD: POSTGRES_PASSWORD
+      POSTGRES_DB: ultrabase
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  ultrabase_api:
+    image: ultrabase/api:latest
+    container_name: ultrabase_api
+    environment:
+      - API_KEY=REEMPLAZA_CON_TU_API_KEY
+      - JWT_SECRET=REEMPLAZA_CON_TU_SECRETO_JWT
+    depends_on:
+      - ultrabase_db
+    restart: unless-stopped
+
+  ultrabase_redis:
+    image: redis:7
+    container_name: ultrabase_redis
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: ultrabase_nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - crm
+    restart: unless-stopped
+
+volumes:
+  db_data:
