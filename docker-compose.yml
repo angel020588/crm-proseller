@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  crm-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.crm
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+    environment:
+      - ENTRYPOINT=server-index.js
+    depends_on: []
