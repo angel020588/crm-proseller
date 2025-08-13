@@ -12,6 +12,8 @@ const getApiUrl = () => {
 
 export const API_URL = getApiUrl();
 
-export default {
+const apiConfig = {
   API_URL
 };
+
+export default apiConfig;

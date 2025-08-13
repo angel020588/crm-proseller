@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -24,7 +24,7 @@ export default function Leads() {
 
   const token = localStorage.getItem("token");
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       const res = await axios.get("/api/leads", {
         headers: { Authorization: `Bearer ${token}` },
@@ -35,7 +35,7 @@ export default function Leads() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -136,7 +136,7 @@ export default function Leads() {
     ? leads 
     : leads.filter(lead => lead.status === filterStatus);
 
-  useEffect(() => { fetchLeads(); }, []);
+  useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
   if (loading) {
     return <div className="flex justify-center items-center h-64">Cargando leads...</div>;
