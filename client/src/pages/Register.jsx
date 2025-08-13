@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 
 // Reemplaza por tu dominio de backend si estás en producción
 const API_URL =
-  import.meta.env.VITE_API_URL || "https://crm-ecotisat.replit.app";
+  process.env.REACT_APP_API_URL || window.location.origin;
 
 export default function Register() {
   const [formData, setFormData] = useState({
