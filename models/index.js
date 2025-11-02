@@ -1,65 +1,20 @@
 
-const { sequelize } = require('../config/database');
+const sequelize = require('../config/database');
 const { DataTypes } = require('sequelize');
 
-// Import all models
-const User = require('./User');
-const Client = require('./Client');
-const Lead = require('./Lead');
-const Followup = require('./Followup');
-const Quotation = require('./Quotation');
-const ApiKey = require('./ApiKey');
-const Role = require('./Role');
-const Notification = require('./Notification');
-const Subscription = require('./Subscription');
+// Import and initialize models
+const User = require('./User')(sequelize, DataTypes);
+const Client = require('./Client')(sequelize, DataTypes);
+const Lead = require('./Lead')(sequelize, DataTypes);
+const Followup = require('./Followup')(sequelize, DataTypes);
+const Quotation = require('./Quotation')(sequelize, DataTypes);
+const ApiKey = require('./ApiKey')(sequelize, DataTypes);
+const Role = require('./Role')(sequelize, DataTypes);
+const Notification = require('./Notification')(sequelize, DataTypes);
+const Subscription = require('./Subscription')(sequelize, DataTypes);
 
-// Define associations
-const defineAssociations = () => {
-  // User associations
-  User.hasMany(Client, { foreignKey: 'assignedTo', as: 'clients' });
-  User.hasMany(Lead, { foreignKey: 'assignedTo', as: 'leads' });
-  User.hasMany(Followup, { foreignKey: 'assignedTo', as: 'followups' });
-  User.hasMany(Quotation, { foreignKey: 'assignedTo', as: 'quotations' });
-  User.hasMany(ApiKey, { foreignKey: 'userId', as: 'apiKeys' });
-  User.belongsTo(Role, { foreignKey: 'roleId', as: 'role' });
-
-  // Client associations
-  Client.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignedUser' });
-  Client.hasMany(Followup, { foreignKey: 'clientId', as: 'followups' });
-  Client.hasMany(Quotation, { foreignKey: 'clientId', as: 'quotations' });
-
-  // Lead associations
-  Lead.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignedUser' });
-  Lead.hasMany(Followup, { foreignKey: 'leadId', as: 'followups' });
-
-  // Followup associations
-  Followup.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignedUser' });
-  Followup.belongsTo(Client, { foreignKey: 'clientId', as: 'client' });
-  Followup.belongsTo(Lead, { foreignKey: 'leadId', as: 'lead' });
-
-  // Quotation associations
-  Quotation.belongsTo(User, { foreignKey: 'assignedTo', as: 'assignedUser' });
-  Quotation.belongsTo(Client, { foreignKey: 'clientId', as: 'client' });
-
-  // ApiKey associations
-  ApiKey.belongsTo(User, { foreignKey: 'userId', as: 'user' });
-
-  // Role associations - already defined in Role model
-  Role.hasMany(User, { foreignKey: 'roleId', as: 'users' });
-
-  // Notification associations (if needed)
-  // Add specific associations for notifications when the model is properly defined
-
-  // Subscription associations (if needed)
-  // Add specific associations for subscriptions when the model is properly defined
-};
-
-// Initialize associations
-defineAssociations();
-
-// Export models
-module.exports = {
-  sequelize,
+// Store models in an object
+const models = {
   User,
   Client,
   Lead,
@@ -69,5 +24,18 @@ module.exports = {
   Role,
   Notification,
   Subscription
+};
+
+// Set up associations
+Object.keys(models).forEach(modelName => {
+  if (models[modelName].associate) {
+    models[modelName].associate(models);
+  }
+});
+
+// Export models and sequelize
+module.exports = {
+  sequelize,
+  ...models
 };
 

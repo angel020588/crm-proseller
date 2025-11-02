@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -7,7 +7,7 @@ export default function Subscription() {
   const [error, setError] = useState("");
   const token = localStorage.getItem("token");
 
-  const fetchSubscription = async () => {
+  const fetchSubscription = useCallback(async () => {
     try {
       const res = await axios.get("/api/subscription", {
         headers: { Authorization: `Bearer ${token}` },
@@ -16,7 +16,7 @@ export default function Subscription() {
     } catch (err) {
       setError("Error al cargar la suscripción");
     }
-  };
+  }, [token]);
 
   const handleSubscribe = async (priceId) => {
     try {
@@ -33,7 +33,7 @@ export default function Subscription() {
 
   useEffect(() => { 
     fetchSubscription(); 
-  }, []);
+  }, [fetchSubscription]);
 
   return (
     <div className="p-6 min-h-screen bg-gradient-to-r from-gray-50 to-blue-100 text-gray-900">

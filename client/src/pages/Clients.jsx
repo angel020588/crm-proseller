@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -16,7 +16,7 @@ export default function Clients() {
 
   const token = localStorage.getItem("token");
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get("/api/clients", {
@@ -29,7 +29,7 @@ export default function Clients() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   const createClient = async (e) => {
     e.preventDefault();
@@ -101,7 +101,7 @@ export default function Clients() {
 
   useEffect(() => { 
     fetchClients(); 
-  }, []);
+  }, [fetchClients]);
 
   if (loading) {
     return (
